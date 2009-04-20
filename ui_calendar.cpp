@@ -4,6 +4,7 @@ using namespace MZ_CommonFunc;
 
 #include "ui_about.h"
 #include "ui_dateEdit.h"
+#include "ui_history.h"
 #include "resource.h"
 
 MZ_IMPLEMENT_DYNAMIC(Ui_CalendarWnd)
@@ -465,8 +466,8 @@ void Ui_CalendarWnd::OnMzCommand(WPARAM wParam, LPARAM lParam) {
 				ppm.AddItem(pmip);
 
 				pmip.itemCr = MZC_BUTTON_PELLUCID;
-				pmip.itemRetID = IDC_PPM_TODATE;
-				pmip.str = L"转到日期";
+				pmip.itemRetID = IDC_PPM_HISTORY;
+				pmip.str = L"历史上的今天";
 				ppm.AddItem(pmip);
 
 				pmip.itemCr = MZC_BUTTON_PELLUCID;
@@ -475,8 +476,8 @@ void Ui_CalendarWnd::OnMzCommand(WPARAM wParam, LPARAM lParam) {
 				ppm.AddItem(pmip);
 
 				pmip.itemCr = MZC_BUTTON_PELLUCID;
-				pmip.itemRetID = IDC_PPM_HISTORY;
-				pmip.str = L"历史上的今天";
+				pmip.itemRetID = IDC_PPM_TODATE;
+				pmip.str = L"转到日期";
 				ppm.AddItem(pmip);
 
 				RECT rc = MzGetWorkArea();      
@@ -550,7 +551,18 @@ void Ui_CalendarWnd::OnMzCommand(WPARAM wParam, LPARAM lParam) {
 					break;
 				}
 				case IDC_PPM_HISTORY:
+				{
+					UI_HistoryWnd dlg;
+					RECT rcWork = MzGetWorkArea();
+					dlg.Create(rcWork.left, rcWork.top, RECT_WIDTH(rcWork), RECT_HEIGHT(rcWork),
+							m_hWnd, 0, WS_POPUP);
+					// set the animation of the window
+					dlg.SetAnimateType_Show(MZ_ANIMTYPE_SCROLL_RIGHT_TO_LEFT_2);
+					dlg.SetAnimateType_Hide(MZ_ANIMTYPE_SCROLL_LEFT_TO_RIGHT_1);
+					dlg.setupdate(_month,_day);
+					dlg.DoModal();
 					break;
+				}
 				case IDC_PPM_RETURN:
 				default:
 					return;

@@ -22,7 +22,7 @@ int Days[12]={31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
 int MZ_CommonDateTime::getDays(int year, int month){
 	int day = 0;
-	if(year < 1970 || (year > 2199)) return day;
+	if(year < 1900 || (year > 2199)) return day;
 
 	if((month < 1) || (month > 12))   return day;   
     
@@ -89,10 +89,23 @@ int MZ_CommonDateTime::checkDate(int year,int month, int day)
 	return rc;   
 } 
 
-void MZ_CommonC::newstrcpy(wchar_t** pdst,const wchar_t* src){
+void MZ_CommonC::newstrcpy(wchar_t** pdst,const wchar_t* src, size_t nsize){
 	if(*pdst) delete *pdst;
-	wchar_t* newdst = new wchar_t[lstrlen(src) + 1];
-	lstrcpy(newdst,src);
+	wchar_t* newdst;
+	if(nsize == 0){
+		newdst = new wchar_t[lstrlen(src) + 1];
+		lstrcpy(newdst,src);
+	}else{
+		if(nsize > lstrlen(src)){
+			nsize = lstrlen(src);
+		}
+		newdst = new wchar_t[nsize + 1];
+		int i = 0;
+		for(i = 0; i < nsize; i++){
+			newdst[i] = src[i];
+		}
+		newdst[i] = '\0';
+	}
 	*pdst = newdst;
 }
 

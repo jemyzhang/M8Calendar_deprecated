@@ -233,6 +233,10 @@
 				RelativePath=".\ui_dateEdit.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\ui_history.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Í·ÎÄ¼þ"
@@ -269,6 +273,10 @@
 			</File>
 			<File
 				RelativePath=".\ui_dateEdit.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ui_history.h"
 				>
 			</File>
 		</Filter>

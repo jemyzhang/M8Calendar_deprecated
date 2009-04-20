@@ -2,41 +2,12 @@
 #include "mz_commonfunc.h"
 //#include "ui_reminder.h"
 //#include "ui_password.h"
-#include <MotorVibrate.h>
+//#include <MotorVibrate.h>
 
 using namespace MZ_CommonFunc;
 // The global variable of the application.
 M8CashApp theApp;
-wchar_t db_path[256];
-clsCASHDB calendar_db;
 //CashReminder calendar_reminder;
-
-bool M8CashApp::checkpwd(){
-	wchar_t currpath[128];
-	bool ret = true;
-	if(File::GetCurrentPath(currpath)){
-		wsprintf(db_path,L"%s\\calendar.db",currpath);
-	}else{
-		wsprintf(db_path,DEFAULT_DB);
-	}
-	if(calendar_db.connect(db_path)){
-		//popup password dialog
-		//try if there is a password
-		calendar_db.decrypt(NULL,0);
-		//¼ì²é¼ÇÂ¼°æ±¾
-		calendar_db.versionUpdate(m_MainWnd.m_hWnd);
-		calendar_db.recover();
-		if(!calendar_db.load()){
-			ret = false;
-		}
-	}else{
-		//¼ì²é¼ÇÂ¼°æ±¾
-		calendar_db.versionUpdate(m_MainWnd.m_hWnd);
-		calendar_db.recover();
-		calendar_db.load();
-	}
-	return ret;
-}
 
 BOOL M8CashApp::Init() {
     // Init the COM relative library.
@@ -92,13 +63,6 @@ BOOL M8CashApp::Init() {
 	RECT rcWork = MzGetWorkArea();
 	m_MainWnd.Create(rcWork.left, rcWork.top, RECT_WIDTH(rcWork), RECT_HEIGHT(rcWork), 0, 0, 0);
 	m_MainWnd.Show();
-	//SetForegroundWindow(m_MainWnd.m_hWnd);
-	//¼ì²âÃÜÂë
-	//if(checkpwd()){
-//		m_MainWnd.updateText();
-	//}else{
-	//	PostQuitMessage(0);
-	//}
 
     // return TRUE means init success.
     return TRUE;
