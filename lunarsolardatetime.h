@@ -26,6 +26,7 @@ typedef struct LSDate{
 	DWORD month;
 	DWORD day;
 	DWORD weekday;
+	DWORD imonth;	//农历，区分闰否
 }LSDATE_t;
 
 typedef struct LS24Term{

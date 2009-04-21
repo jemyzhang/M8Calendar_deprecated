@@ -347,6 +347,7 @@ void LunarSolarDateTime::SolarToLunar(){
 			a.CalcLunarDaysInMonth();
 			if(offset < a.lunarDaysInMonth[iMonth]){
 				lunar.month = iMonth + 1;
+				lunar.imonth = iMonth + 1;
 				break;
 			}
 			offset -= a.lunarDaysInMonth[iMonth];
@@ -354,7 +355,7 @@ void LunarSolarDateTime::SolarToLunar(){
 
 		lunar.day = offset + 1;
 
-		if(LunarLeapMonth() > 0 && lunar.month >= LunarLeapMonth()){
+		if(LunarLeapMonth() > 0 && lunar.month > LunarLeapMonth()){
 			lunar.month -= 1;
 		}
 }
@@ -410,7 +411,7 @@ CMzString LunarSolarDateTime::LunarMonth(){
 //农历日名称
 CMzString LunarSolarDateTime::LunarDay(){
 	if(lunar.day == 1 && LunarLeapMonth() > 0){
-		if( LunarLeapMonth() == lunar.month){
+		if( LunarLeapMonth() == lunar.month && lunar.imonth != lunar.month){
 			CMzString retstr = L"闰";
 			return (retstr + LunarMonth());//LunarDayName[LunarLeapMonth() - 1]);
 		}else{
@@ -541,6 +542,7 @@ wchar_t* LunarSolarDateTime::LunarHoliday(){
 	wchar_t* s = 0;
 	for(int i = 0; i < nsets; i++){
 		if(lunar.month == lunarHoliday[i].month &&
+			lunar.month == lunar.imonth &&
 			lunar.day == lunarHoliday[i].day){
 				s = lunarHoliday[i].name;
 				break;

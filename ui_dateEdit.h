@@ -16,6 +16,21 @@ protected:
 		PostUiMessage(GetParent(),GetID());
 		return ret;
 	}
+	virtual void OnFocusd(UiWin* pWinPrev){
+		preStr = GetText();
+		SetText(L"\0");
+		Invalidate();
+		Update();
+	}
+	virtual void OnLostFocus(UiWin* pWinNext){
+		if(GetText().IsEmpty() && !preStr.IsEmpty()){
+			SetText(preStr.C_Str());
+			Invalidate();
+			Update();
+		}
+	}
+private:
+	CMzString preStr;
 };
 
 class UiDateEdit : public UiWin
