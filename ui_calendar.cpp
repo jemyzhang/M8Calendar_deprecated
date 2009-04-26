@@ -6,6 +6,7 @@ using namespace MZ_CommonFunc;
 #include "ui_dateEdit.h"
 #include "ui_history.h"
 #include "resource.h"
+#include "ui_config.h"
 
 MZ_IMPLEMENT_DYNAMIC(Ui_CalendarWnd)
 
@@ -300,6 +301,7 @@ void UiGrid::PaintWin(HDC hdcDst, RECT* prcWin, RECT* prcUpdate){
 
 Ui_CalendarWnd::Ui_CalendarWnd(void)
 {
+	_showMonthByJieqi = Ui_ConfigWnd::getJieqiMode();
 }
 
 Ui_CalendarWnd::~Ui_CalendarWnd(void)
@@ -368,7 +370,7 @@ BOOL Ui_CalendarWnd::OnInitDialog() {
     m_Toolbar.SetPos(0, GetHeight() - MZM_HEIGHT_TEXT_TOOLBAR, GetWidth(), MZM_HEIGHT_TEXT_TOOLBAR);
     m_Toolbar.SetButton(0, true, true, L"今日");
     m_Toolbar.SetButton(1, true, true, L"更多");
-    m_Toolbar.SetButton(2, true, true, L"退出");
+    m_Toolbar.SetButton(2, true, true, L"设置");
     m_Toolbar.SetID(MZ_IDC_TOOLBAR_CALENDAR);
     AddUiWin(&m_Toolbar);
 
@@ -435,12 +437,14 @@ void Ui_CalendarWnd::OnMzCommand(WPARAM wParam, LPARAM lParam) {
 			_day = 1;
 			updateGrid();
 			updateInfo();
+			showTip();
 			break;
 		case MZ_IDC_CALENDAR_PRE:
 			DateTime::getPreDate(_year,_month);
 			_day = 1;
 			updateGrid();
 			updateInfo();
+			showTip();
 			break;
         case MZ_IDC_TOOLBAR_CALENDAR:
         {
@@ -448,7 +452,8 @@ void Ui_CalendarWnd::OnMzCommand(WPARAM wParam, LPARAM lParam) {
 			if(nIndex == 0){	//今日
 				DateTime::getDate(&_year,&_month,&_day);
 				updateGrid();
-				updateInfo();				
+				updateInfo();
+				showTip();
 				return;
 			}
 			if(nIndex == 1){	//更多
@@ -570,10 +575,61 @@ void Ui_CalendarWnd::OnMzCommand(WPARAM wParam, LPARAM lParam) {
 				}
 				return;
 			}
-			if(nIndex == 2){	//确定
-				PostQuitMessage(0);
+			if(nIndex == 2){	//设定
+				Ui_ConfigWnd dlg;
+				RECT rcWork = MzGetWorkArea();
+				dlg.Create(rcWork.left, rcWork.top, RECT_WIDTH(rcWork), RECT_HEIGHT(rcWork),
+						m_hWnd, 0, WS_POPUP);
+				// set the animation of the window
+				dlg.SetAnimateType_Show(MZ_ANIMTYPE_SCROLL_RIGHT_TO_LEFT_2);
+				dlg.SetAnimateType_Hide(MZ_ANIMTYPE_SCROLL_LEFT_TO_RIGHT_1);
+				int ret = dlg.DoModal();
+				if(ret == ID_OK){
+					_showMonthByJieqi = dlg.getJieqiMode();
+					updateGrid();
+					updateInfo(true);
+					showTip();
+				}
 				return;
 			}
+		}
+	}
+}
+void Ui_CalendarWnd::showTip(bool bshow){
+	//
+	LunarSolarDateTime _lstm(_year,_month,_day);
+	_lstm.SolarToLunar();
+	CMzString yi,ji;
+	bool ret = _lstm.HuangliYiJi(yi,ji);
+	tipdlg.setYiJiText(yi.C_Str(),ji.C_Str(),ret);
+	int row,col;
+	m_Calendar.getSelectedIndex(row,col);
+	RECT rcWork;// = MzGetWorkArea();
+	rcWork.left = 69 * col + 2;
+	if(col > 2){
+		rcWork.left = 480 - 320 - 10;
+	}
+	rcWork.top = m_Calendar.GetTopPos() + 69 * (row + 1) + 28;
+	if(row > 4){
+		rcWork.left += 69;
+		rcWork.top -= 69;
+	}
+
+	rcWork.right = rcWork.left + 320;
+	rcWork.bottom = rcWork.top + 120;
+
+
+	if(tipdlg.IsVisible()){
+		tipdlg.SetWindowPos(m_hWnd,rcWork.left, rcWork.bottom, RECT_WIDTH(rcWork), RECT_HEIGHT(rcWork));
+		tipdlg.Invalidate();
+		tipdlg.UpdateWindow();
+	}else{
+		if(bshow){
+			tipdlg.Create(rcWork.left, rcWork.bottom, RECT_WIDTH(rcWork), RECT_HEIGHT(rcWork),
+					m_hWnd, 0, WS_CHILD,0);
+			tipdlg.SetWindowPos(m_hWnd,rcWork.left, rcWork.bottom, RECT_WIDTH(rcWork), RECT_HEIGHT(rcWork));
+			// set the animation of the window
+			tipdlg.Show(true);
 		}
 	}
 }
@@ -601,6 +657,7 @@ LRESULT Ui_CalendarWnd::MzDefWndProc(UINT message, WPARAM wParam, LPARAM lParam)
 						m_Calendar.Invalidate();
 						m_Calendar.Update();
 						updateInfo();
+						showTip();
 					}
                 }
                 return 0;
@@ -616,7 +673,7 @@ LRESULT Ui_CalendarWnd::MzDefWndProc(UINT message, WPARAM wParam, LPARAM lParam)
 							return 0;
 						}
 						_day = _wtoi(s.C_Str());
-						EndModal(ID_OK);
+						showTip(true);
 					}
                 }
                 return 0;
@@ -627,15 +684,16 @@ LRESULT Ui_CalendarWnd::MzDefWndProc(UINT message, WPARAM wParam, LPARAM lParam)
     return CMzWndEx::MzDefWndProc(message, wParam, lParam);
 }
 
-void Ui_CalendarWnd::updateInfo(){
+void Ui_CalendarWnd::updateInfo(bool forceupdate){
 	static int y = 0;
 	static int m = 0;
 	static int d = 0;
 	if(y != _year || 
 		m != _month ||
-		d != _day){
+		d != _day || forceupdate){
 		LunarSolarDateTime _lstm(_year,_month,_day);
 		_lstm.SolarToLunar();
+		_lstm.setLunarMonthGanZhiMode(_showMonthByJieqi);
 		unsigned char zodiac;
 		CMzString zodiacName = _lstm.Zodiac(&zodiac);
 		ImagingHelper *pimg = ImagingHelper::GetImageObject(MzGetInstanceHandle(), IDB_PNG1 + zodiac, true);

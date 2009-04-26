@@ -267,6 +267,62 @@ const HOLIDAY_t lunarHoliday[] = {
 const unsigned char solarDaysInMonth[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 const unsigned char lunarMonthDay[] = {29, 30};
 
+//黄历
+enum jcIndex{ JIAN = 0, CHU = 1, MAN, PING, DING, ZHI, PO, WEI, CHEN, SHOU, KAI, BI};
+const unsigned char JianCangs[12][12] = {
+	{JIAN,CHU,MAN,PING,DING,ZHI,PO,WEI,CHEN,SHOU,KAI,BI},
+	{BI,JIAN,CHU,MAN,PING,DING,ZHI,PO,WEI,CHEN,SHOU,KAI},
+	{KAI,BI,JIAN,CHU,MAN,PING,DING,ZHI,PO,WEI,CHEN,SHOU},
+	{SHOU,KAI,BI,JIAN,CHU,MAN,PING,DING,ZHI,PO,WEI,CHEN},
+	{CHEN,SHOU,KAI,BI,JIAN,CHU,MAN,PING,DING,ZHI,PO,WEI},
+	{WEI,CHEN,SHOU,KAI,BI,JIAN,CHU,MAN,PING,DING,ZHI,PO},
+	{PO,WEI,CHEN,SHOU,KAI,BI,JIAN,CHU,MAN,PING,DING,ZHI},
+	{ZHI,PO,WEI,CHEN,SHOU,KAI,BI,JIAN,CHU,MAN,PING,DING},
+	{DING,ZHI,PO,WEI,CHEN,SHOU,KAI,BI,JIAN,CHU,MAN,PING},
+	{PING,DING,ZHI,PO,WEI,CHEN,SHOU,KAI,BI,JIAN,CHU,MAN},
+	{MAN,PING,DING,ZHI,PO,WEI,CHEN,SHOU,KAI,BI,JIAN,CHU},
+	{CHU,MAN,PING,DING,ZHI,PO,WEI,CHEN,SHOU,KAI,BI,JIAN},
+};
+//宜
+const wchar_t* huangli_yi[] = {
+	L"出行,上任,会友,上书,见工",
+	L"除服,疗病,出行,拆卸,入宅",
+	L"祈福,祭祀,结亲,开市,交易",
+	L"祭祀,修坟,涂泥,余事勿取 ",
+	L"交易,立券,会友,签约,纳畜",
+	L"祈福,祭祀,求子,结婚,立约",
+	L"求医,赴考,祭祀,余事勿取 ",
+	L"经营,交易,求官,纳畜,動土",
+	L"祈福,入学,开市,求医,成服",
+	L"祭祀,求财,签约,嫁娶,订盟",
+	L"疗病,结婚,交易,入仓,求职",
+	L"祭祀,交易,收财,安葬     ",
+};
+
+//忌
+const wchar_t* huangli_ji[] = {
+	L"动土,开仓,嫁娶,纳采     ",
+	L"求官,上任,开张,搬家,探病",
+	L"服药,求医,栽种,动土,迁移",
+	L"移徙,入宅,嫁娶,开市,安葬",
+	L"种植,置业,卖田,掘井,造船",
+	L"开市,交易,搬家,远行     ",
+	L"动土,出行,移徙,开市,修造",
+	L"登高,行船,安床,入宅,博彩",
+	L"词讼,安門,移徙          ",
+	L"开市,安床,安葬,入宅,破土",
+	L"安葬,动土,针灸          ",
+	L"宴会,安床,出行,嫁娶,移徙",
+};
+
+//特殊
+const wchar_t* huangli_ts[] = {
+	L"日值岁破 大事不宜",
+	L"日值月破 大事不宜",
+	L"日值上朔 大事不宜",
+	L"日值杨公十三忌 大事不宜",
+};
+
 // Calculate days in a year
 unsigned int LunarSolarDateTime::daysOfYear(LSDate date){
 	DWORD _year = date.year - 1;
@@ -453,27 +509,36 @@ CMzString LunarSolarDateTime::GanZhiYear(unsigned char *gan, unsigned char *zhi)
 	return strgz;
 }
 
-
 //返回干支月
 CMzString LunarSolarDateTime::GanZhiMonth(unsigned char *gan, unsigned char *zhi){
-	unsigned char yearGan;
-	GanZhiYear(&yearGan);
-	
-	const wchar_t* monthZhi = Zhi[(2 + lunar.month - 1) % 12];
-
 	CMzString monthGanz;
-	if(yearGan == 0 || yearGan == 5){
-		monthGanz = Gan[(2 + lunar.month - 1) % 10];
-	}else if(yearGan == 1 || yearGan == 6){
-		monthGanz = Gan[(4 + lunar.month - 1) % 10];
-	}else if(yearGan == 2 || yearGan == 7){
-		monthGanz = Gan[(6 + lunar.month - 1) % 10];
-	}else if(yearGan == 3 || yearGan == 8){
-		monthGanz = Gan[(8 + lunar.month - 1) % 10];
-	}else if(yearGan == 4 || yearGan == 9){
-		monthGanz = Gan[(0 + lunar.month - 1) % 10];
+	
+	if(_monthGanzhiByJieqi){
+		DWORD lmonth;
+		lmonth = (solar.year - 1900 + 1) * 12 + solar.month - 1;
+		if(solar.day >= GetFirstJieqiDay()){
+			lmonth += 1;
+		}
+		monthGanz = Gan[lmonth % 10];
+		monthGanz = monthGanz + Zhi[lmonth % 12];
+	}else{
+		unsigned char yearGan;
+		GanZhiYear(&yearGan);
+		monthGanz = Zhi[(2 + lunar.month - 1) % 12];
+
+		if(yearGan == 0 || yearGan == 5){
+			monthGanz = monthGanz + Gan[(2 + lunar.month - 1) % 10];
+		}else if(yearGan == 1 || yearGan == 6){
+			monthGanz = monthGanz + Gan[(4 + lunar.month - 1) % 10];
+		}else if(yearGan == 2 || yearGan == 7){
+			monthGanz = monthGanz + Gan[(6 + lunar.month - 1) % 10];
+		}else if(yearGan == 3 || yearGan == 8){
+			monthGanz = monthGanz + Gan[(8 + lunar.month - 1) % 10];
+		}else if(yearGan == 4 || yearGan == 9){
+			monthGanz = monthGanz + Gan[(0 + lunar.month - 1) % 10];
+		}
 	}
-	return monthGanz + monthZhi;
+	return monthGanz;
 }
 
 	//返回干支日
@@ -549,6 +614,90 @@ wchar_t* LunarSolarDateTime::LunarHoliday(){
 		}
 	}
 	return s;
+}
+//==================黄历===============
+char LunarSolarDateTime::CalConv2(int yy,int mm,int dd,int y,int d,int m,int dt,int nm,int nd) {
+	int dy = dd > 10 ? d * 100 + dd : d * 10 + dd;
+	if((yy==0 && dd==6)||
+		(yy==6 && dd==0)||
+		(yy==1 && dd==7)||
+		(yy==7 && dd==1)||
+		(yy==2 && dd==8)||
+		(yy==8 && dd==2)||
+		(yy==3 && dd==9)||
+		(yy==9 && dd==3)||
+		(yy==4 && dd==10)||
+		(yy==10 && dd==4)||
+		(yy==5 && dd==11)||
+		(yy==11 && dd==5)) {
+			return 0;
+	}else if((mm==0 && dd==6)||
+		(mm==6 && dd==0)||
+		(mm==1 && dd==7)||
+		(mm==7 && dd==1)||
+		(mm==2 && dd==8)||
+		(mm==8 && dd==2)||
+		(mm==3 && dd==9)||
+		(mm==9 && dd==3)||
+		(mm==4 && dd==10)||
+		(mm==10 && dd==4)||
+		(mm==5 && dd==11)||
+		(mm==11 && dd==5)) { 
+			return 1;
+	}else if((y==0 && dy==911)||
+		(y==1 && dy==55)||
+		(y==2 && dy==111)||
+		(y==3 && dy==75)||
+		(y==4 && dy==311)||
+		(y==5 && dy==95)||
+		(y==6 && dy==511)||
+		(y==7 && dy==15)||
+		(y==8 && dy==711)||
+		(y==9 && dy==35)) {
+			return 2;
+	}else if((m==1 && dt==13)||
+		(m==2 && dt==11)||
+		(m==3 && dt==9)||
+		(m==4 && dt==7)||
+		(m==5 && dt==5)||
+		(m==6 && dt==3)||
+		(m==7 && dt==1)||
+		(m==7 && dt==29)||
+		(m==8 && dt==27)||
+		(m==9 && dt==25)||
+		(m==10 && dt==23)||
+		(m==11 && dt==21)||
+		(m==12 && dt==19)) {
+			return 3;
+	}else{
+		return -1;
+	}
+}
+
+bool LunarSolarDateTime::HuangliYiJi(CMzString &yi, CMzString &ji){
+	bool ret = false;
+	int ly,lm,ld;
+	ly = solar.year - 1900 + 36;
+	lm = (solar.year - 1900) * 12 + (solar.month - 1) + 12;	//13
+	if(solar.day >= GetFirstJieqiDay()){
+		lm += 1;
+	}
+	ld = diffDate(LSDate(solar.year,solar.month,1),LSDate(1900,1,1)) + 10 + solar.day - 1;
+	unsigned char jc = JianCangs[lm%12][ld%12];
+	char is = CalConv2(ly%12,lm%12,ld%12,ly%10,ld%10,lunar.month,lunar.day,solar.month,solar.day);
+	if(is >= 0){
+		ret = true;
+		yi = huangli_ts[is];
+	}else{
+		yi = huangli_yi[jc];
+		ji = huangli_ji[jc];
+	}
+	return ret;
+}
+
+DWORD LunarSolarDateTime::GetFirstJieqiDay(){
+	unsigned char code = solarTermCode[(solar.year - baseDate.year) * 12 + solar.month - 1];
+	return (15 - ((code>>4)&0xf));
 }
 
 //从日期得到儒略日

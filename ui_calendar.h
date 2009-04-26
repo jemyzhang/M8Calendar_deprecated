@@ -12,6 +12,120 @@
 #else
 #pragma message("Grid:直接绘图")
 #endif
+
+class UiYiJiLabel : public UiWin
+{
+public:
+	UiYiJiLabel(){
+		_isTs = false;
+	}
+	~UiYiJiLabel(){
+	}
+	virtual void PaintWin(HDC hdcDst, RECT* prcWin, RECT* prcUpdate){
+		SetBkMode(hdcDst,TRANSPARENT);
+
+		MzDrawGridDlgBG(hdcDst,prcWin);
+
+		HFONT hf = FontHelper::GetFont( 30 );
+		SelectObject( hdcDst , hf );
+
+		RECT rect;
+		int height = prcWin->bottom - prcWin->top - 20;
+		int width = prcWin->right - prcWin->left;
+		rect.left = prcWin->left + 20;
+		rect.right = rect.left + 50;
+		//宜
+		rect.top = prcWin->top;
+		rect.bottom = rect.top + height / 2;
+		::SetTextColor( hdcDst,RGB(64,255,128));
+		MzDrawText( hdcDst, L"宜", &rect, DT_LEFT|DT_SINGLELINE|DT_VCENTER|DT_END_ELLIPSIS );
+		//忌
+		rect.top = prcWin->top + height / 2;
+		rect.bottom = prcWin->bottom - 10;
+		::SetTextColor( hdcDst, RGB(255,64,64));
+		MzDrawText( hdcDst, L"忌", &rect, DT_LEFT|DT_SINGLELINE|DT_VCENTER|DT_END_ELLIPSIS );
+		DeleteObject( hf );
+
+		hf = FontHelper::GetFont( 20 );
+		SelectObject( hdcDst , hf );
+
+		if(_isTs){
+			rect.top = prcWin->top;
+			rect.bottom = prcWin->bottom - 10;
+			rect.left = prcWin->left + 60;
+			rect.right = prcWin->right;
+			::SetTextColor( hdcDst, RGB(255,64,255));
+			MzDrawText( hdcDst, tsText.C_Str(), &rect, DT_LEFT|DT_SINGLELINE|DT_VCENTER|DT_END_ELLIPSIS );
+		}else{
+			::SetTextColor( hdcDst, RGB(255,255,255));
+
+			rect.top = prcWin->top;
+			rect.bottom = rect.top + height / 2;
+			rect.left = prcWin->left + 60;
+			rect.right = prcWin->right;
+			MzDrawText( hdcDst, yiText.C_Str(), &rect, DT_LEFT|DT_SINGLELINE|DT_VCENTER|DT_END_ELLIPSIS );
+
+			rect.top = prcWin->top + height / 2;
+			rect.bottom = prcWin->bottom - 10;
+			MzDrawText( hdcDst, jiText.C_Str(), &rect, DT_LEFT|DT_SINGLELINE|DT_VCENTER|DT_END_ELLIPSIS );
+		}
+		DeleteObject( hf );
+	}
+	void setText(wchar_t* yi, wchar_t* ji,bool ts = false){
+		_isTs = ts;
+		if(!ts){
+			yiText = yi;
+			jiText = ji;
+		}else{
+			tsText = yi;
+		}
+	}
+private:
+	CMzString yiText,jiText,tsText;
+	bool _isTs;	//特殊
+};
+
+class Ui_CalendarTipWnd : public CMzWndEx
+{
+public:
+	Ui_CalendarTipWnd(){
+	}
+	~Ui_CalendarTipWnd(){
+	}
+	void setYiJiText(wchar_t* yi, wchar_t* ji,bool ts = false){
+		m_yijiLabel.setText(yi,ji,ts);
+		m_yijiLabel.Update();
+	}
+protected:
+   // Initialization of the window (dialog)
+	virtual BOOL OnInitDialog(){
+		// Must all the Init of parent class first!
+		if (!CMzWndEx::OnInitDialog()) {
+			return FALSE;
+		}
+
+		m_yijiLabel.SetPos(0,0,GetWidth(),GetHeight());
+		m_yijiLabel.EnableNotifyMessage(true);
+		AddUiWin(&m_yijiLabel);
+		return TRUE;
+	}
+    // override the MZFC window messages handler
+	virtual LRESULT MzDefWndProc(UINT message, WPARAM wParam, LPARAM lParam){
+		switch (message) {
+			case MZ_WM_MOUSE_NOTIFY:
+			{
+				Show(false);
+				//EndModal(ID_OK);
+			}
+			default:
+				break;
+		}
+		return CMzWndEx::MzDefWndProc(message, wParam, lParam);
+	}
+public:
+	UiYiJiLabel m_yijiLabel;
+};
+
 class UiImage : public UiWin
 {
 public:
@@ -127,6 +241,7 @@ public:
 	UiStatic m_LunarMD;	//农历月日
 	UiStatic m_GanZhiYMD;	//干支年月日
 	UiImage m_ZodiacImage;
+	Ui_CalendarTipWnd tipdlg;
 public:
 	CMzString getDate();
 protected:
@@ -139,7 +254,9 @@ protected:
     virtual LRESULT MzDefWndProc(UINT message, WPARAM wParam, LPARAM lParam);
 private:
 	void updateGrid();
-	void updateInfo();
+	void updateInfo(bool forceupdate = false);
+	void showTip(bool bshow = false);
 private:
 	int _year, _month, _day;
+	bool _showMonthByJieqi;
 };

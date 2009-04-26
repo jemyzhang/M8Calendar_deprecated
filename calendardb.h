@@ -16,9 +16,7 @@ using namespace std;
 #endif
 
 #define TABLE_HISTORY	L"HISTORY_v1"
-
 #define HISTORY_TBL_ITEM L"YEAR numeric not null,MONTH numeric not null,DAY numeric not null,TITLE text NOT NULL primary key,CONTENT text NOT NULL"
-
 #define HISTORY_TBL_INSERT L"(YEAR,MONTH,DAY,TITLE,CONTENT) values(%d,%d,%d,\"%s\",\"%s\")"
 
 typedef struct CALENDAR_HISTORY {

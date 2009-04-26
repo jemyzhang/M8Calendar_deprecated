@@ -66,7 +66,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions=" /subsystem:windowsce,6.00"
-				AdditionalDependencies="mzfc.lib PlatformApi.lib CallInterface.lib"
+				AdditionalDependencies="mzfc.lib PlatformApi.lib CallInterface.lib sqlitece_static.lib"
 				OutputFile="$(OutDir)/M8Calendar.exe"
 				LinkIncremental="2"
 				DelayLoadDLLs="$(NOINHERIT)"
@@ -230,6 +230,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ui_config.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ui_dateEdit.cpp"
 				>
 			</File>
@@ -269,6 +273,10 @@
 			</File>
 			<File
 				RelativePath=".\ui_calendar.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ui_config.h"
 				>
 			</File>
 			<File

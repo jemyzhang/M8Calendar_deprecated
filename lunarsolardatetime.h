@@ -41,6 +41,7 @@ public:
 		solar = LSDate(year,month,day,week);
 		lunar = LSDate(year,-1,-1,-1);
 		baseDate = LSDate(1900, 1, 31, 2); // 1900年1月31日星期三（庚子年正月初一壬寅日）(甲辰日)
+		_monthGanzhiByJieqi = false;
 	}
 public:
 	void setDay(DWORD d) { solar.day = d; SolarToLunar(); };
@@ -54,6 +55,10 @@ public:
 	//获取公历日期
 	LSDate getSolarDate() { return solar; }
 	LSDate getLunarDate() { return lunar; }
+	//是否以节气为月干支起始
+	void setLunarMonthGanZhiMode(bool byjieqi){
+		_monthGanzhiByJieqi = byjieqi;
+	}
 public:
 	// Calculate days in a year
 	unsigned int daysOfYear(LSDate);
@@ -101,6 +106,13 @@ public:
 	wchar_t* LunarHoliday();
 	// Returns 24 solar terms in the solar year
 	LS24TERM_ptr SolarTerm(void);
+	//返回每个月节气的第一天
+	DWORD GetFirstJieqiDay();
+	//==============黄历==============
+	char CalConv2(int yy,int mm,int dd,int y,int d,int m,int dt,int nm,int nd);
+	//宜，忌
+	//特殊情况返回true, 内容存放在yi中
+	bool HuangliYiJi(CMzString &yi, CMzString &ji);
 public:
 	unsigned int julianDayFromDate(int year, int month, int day);
 	void getDateFromJulianDay(unsigned int julianDay, DWORD *year, DWORD *month, DWORD *day);
@@ -111,4 +123,5 @@ private:
 	LS24TERM_t terms[2];	//24节气发生日
 	unsigned int lunarYearDays;
 	unsigned char lunarDaysInMonth[13];
+	bool _monthGanzhiByJieqi;
 };
