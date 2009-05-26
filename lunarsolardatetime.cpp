@@ -607,7 +607,7 @@ wchar_t* LunarSolarDateTime::LunarHoliday(){
 	wchar_t* s = 0;
 	for(int i = 0; i < nsets; i++){
 		if(lunar.month == lunarHoliday[i].month &&
-			lunar.month == lunar.imonth &&
+			!(LunarLeapMonth() == lunar.month && lunar.month != lunar.imonth) &&	//·ÇÈòÔÂ
 			lunar.day == lunarHoliday[i].day){
 				s = lunarHoliday[i].name;
 				break;

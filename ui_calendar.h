@@ -22,6 +22,7 @@ public:
 	~UiYiJiLabel(){
 	}
 	virtual void PaintWin(HDC hdcDst, RECT* prcWin, RECT* prcUpdate){
+		UiWin::PaintWin(hdcDst,prcWin,prcUpdate);
 		SetBkMode(hdcDst,TRANSPARENT);
 
 		MzDrawGridDlgBG(hdcDst,prcWin);
@@ -83,47 +84,6 @@ public:
 private:
 	CMzString yiText,jiText,tsText;
 	bool _isTs;	//特殊
-};
-
-class Ui_CalendarTipWnd : public CMzWndEx
-{
-public:
-	Ui_CalendarTipWnd(){
-	}
-	~Ui_CalendarTipWnd(){
-	}
-	void setYiJiText(wchar_t* yi, wchar_t* ji,bool ts = false){
-		m_yijiLabel.setText(yi,ji,ts);
-		m_yijiLabel.Update();
-	}
-protected:
-   // Initialization of the window (dialog)
-	virtual BOOL OnInitDialog(){
-		// Must all the Init of parent class first!
-		if (!CMzWndEx::OnInitDialog()) {
-			return FALSE;
-		}
-
-		m_yijiLabel.SetPos(0,0,GetWidth(),GetHeight());
-		m_yijiLabel.EnableNotifyMessage(true);
-		AddUiWin(&m_yijiLabel);
-		return TRUE;
-	}
-    // override the MZFC window messages handler
-	virtual LRESULT MzDefWndProc(UINT message, WPARAM wParam, LPARAM lParam){
-		switch (message) {
-			case MZ_WM_MOUSE_NOTIFY:
-			{
-				Show(false);
-				//EndModal(ID_OK);
-			}
-			default:
-				break;
-		}
-		return CMzWndEx::MzDefWndProc(message, wParam, lParam);
-	}
-public:
-	UiYiJiLabel m_yijiLabel;
 };
 
 class UiImage : public UiWin
@@ -233,15 +193,15 @@ public:
 public:
     UiToolbar_Text m_Toolbar;
 	UiCaption m_CaptionHeader;
-	UiButton m_BtnNext;
-	UiButton m_BtnPre;
+//	UiButton m_BtnNext;
+//	UiButton m_BtnPre;
 	UiStatic m_YearMonth;
 	UiStatic m_WeekBar;
 	UiGrid m_Calendar;
 	UiStatic m_LunarMD;	//农历月日
 	UiStatic m_GanZhiYMD;	//干支年月日
 	UiImage m_ZodiacImage;
-	Ui_CalendarTipWnd tipdlg;
+	UiYiJiLabel m_Tipyiji;
 public:
 	CMzString getDate();
 protected:
@@ -259,4 +219,8 @@ private:
 private:
 	int _year, _month, _day;
 	bool _showMonthByJieqi;
+	bool _isMouseMoving;
+	short _MouseX;
+	short _MouseY;
+	int sel_row,sel_col;
 };

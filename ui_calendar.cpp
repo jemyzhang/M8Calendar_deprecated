@@ -15,8 +15,9 @@ MZ_IMPLEMENT_DYNAMIC(Ui_CalendarWnd)
 #define MZ_IDC_Edit_MONTH 103
 #define MZ_IDC_Edit_DAY 104
 #define MZ_IDC_CALENDAR_GRID 105
-#define MZ_IDC_CALENDAR_NEXT 106
-#define MZ_IDC_CALENDAR_PRE 107
+//#define MZ_IDC_CALENDAR_NEXT 106
+//#define MZ_IDC_CALENDAR_PRE 107
+#define MZ_IDC_YIJI_TIP 108
 
 #define IDC_PPM_ABOUT 101
 #define IDC_PPM_TODATE 102
@@ -302,6 +303,7 @@ void UiGrid::PaintWin(HDC hdcDst, RECT* prcWin, RECT* prcUpdate){
 Ui_CalendarWnd::Ui_CalendarWnd(void)
 {
 	_showMonthByJieqi = Ui_ConfigWnd::getJieqiMode();
+	_isMouseMoving = false;
 }
 
 Ui_CalendarWnd::~Ui_CalendarWnd(void)
@@ -322,43 +324,34 @@ BOOL Ui_CalendarWnd::OnInitDialog() {
     // Then init the controls & other things in the window
     int y = 0;
 	m_CaptionHeader.SetPos(0,y,GetWidth(),128 + MZM_HEIGHT_CAPTION/2);
+	m_CaptionHeader.EnableNotifyMessage(true);
 	AddUiWin(&m_CaptionHeader);
 
-	m_ZodiacImage.SetPos(0,0,128,128);
+	m_ZodiacImage.SetPos(5,0,128,128);
 	m_CaptionHeader.AddChild(&m_ZodiacImage);
 
 	m_YearMonth.SetPos(128 + 40,10,(GetWidth() - 128)*3/4,MZM_HEIGHT_CAPTION);
-	m_YearMonth.SetTextSize(30);
+	m_YearMonth.SetTextSize(32);
+	m_YearMonth.EnableNotifyMessage(true);
 	m_CaptionHeader.AddChild(&m_YearMonth);
 
 	m_GanZhiYMD.SetPos(128 + 40,10 + MZM_HEIGHT_CAPTION,(GetWidth() - 128)*3/4,MZM_HEIGHT_CAPTION);
 	m_GanZhiYMD.SetTextColor(RGB(128,128,128));
 	m_GanZhiYMD.SetTextSize(23);
+	m_GanZhiYMD.EnableNotifyMessage(true);
 	m_CaptionHeader.AddChild(&m_GanZhiYMD);
 
 	m_LunarMD.SetPos(128 + 40,10 + MZM_HEIGHT_CAPTION + 30,(GetWidth() - 128)*3/4,MZM_HEIGHT_CAPTION);
 	m_LunarMD.SetTextColor(RGB(128,128,128));
 	m_LunarMD.SetTextSize(23);
+	m_LunarMD.EnableNotifyMessage(true);
 	m_CaptionHeader.AddChild(&m_LunarMD);
-
-	m_BtnNext.SetPos(GetWidth() - 70,10,60,MZM_HEIGHT_CAPTION);
-	m_BtnNext.SetButtonType(MZC_BUTTON_RECT_NOFILL);
-	m_BtnNext.SetText(L">>");
-	m_BtnNext.SetTextColor(RGB(0,0,0));
-	m_BtnNext.SetID(MZ_IDC_CALENDAR_NEXT);
-	m_CaptionHeader.AddChild(&m_BtnNext);
-
-	m_BtnPre.SetPos(128 + 10,10,60,MZM_HEIGHT_CAPTION);
-	m_BtnPre.SetButtonType(MZC_BUTTON_RECT_NOFILL);
-	m_BtnPre.SetText(L"<<");
-	m_BtnPre.SetTextColor(RGB(0,0,0));
-	m_BtnPre.SetID(MZ_IDC_CALENDAR_PRE);
-	m_CaptionHeader.AddChild(&m_BtnPre);
 
 	m_WeekBar.SetPos(0,128,GetWidth(),MZM_HEIGHT_CAPTION/2);
 	m_WeekBar.SetText(L"星期日   星期一   星期二   星期三    星期四   星期五   星期六");
 	m_WeekBar.SetTextSize(17);
 	m_WeekBar.SetTextColor(RGB(128,128,128));
+	m_WeekBar.EnableNotifyMessage(true);
 	m_CaptionHeader.AddChild(&m_WeekBar);
 
 	y+= 128 + MZM_HEIGHT_CAPTION / 2;
@@ -373,6 +366,11 @@ BOOL Ui_CalendarWnd::OnInitDialog() {
     m_Toolbar.SetButton(2, true, true, L"设置");
     m_Toolbar.SetID(MZ_IDC_TOOLBAR_CALENDAR);
     AddUiWin(&m_Toolbar);
+
+	m_Tipyiji.SetID(MZ_IDC_YIJI_TIP);
+	m_Tipyiji.EnableNotifyMessage(true);
+	m_Tipyiji.SetVisible(false);
+	AddUiWin(&m_Tipyiji);
 
 	DateTime::getDate(&_year,&_month,&_day);
 	updateGrid();
@@ -406,6 +404,8 @@ void Ui_CalendarWnd::updateGrid(){
 		}
 		if(_day == i+1){
 			m_Calendar.setSelectedIndex(r,c);
+			sel_row = r;
+			sel_col = c;
 		}
 		for(int j = 0; j < 2; j++){
 			if(i == (p24term[j].day - 1)){
@@ -432,20 +432,6 @@ void Ui_CalendarWnd::updateGrid(){
 void Ui_CalendarWnd::OnMzCommand(WPARAM wParam, LPARAM lParam) {
     UINT_PTR id = LOWORD(wParam);
     switch (id) {
-		case MZ_IDC_CALENDAR_NEXT:
-			DateTime::getNextDate(_year,_month);
-			_day = 1;
-			updateGrid();
-			updateInfo();
-			showTip();
-			break;
-		case MZ_IDC_CALENDAR_PRE:
-			DateTime::getPreDate(_year,_month);
-			_day = 1;
-			updateGrid();
-			updateInfo();
-			showTip();
-			break;
         case MZ_IDC_TOOLBAR_CALENDAR:
         {
             int nIndex = lParam;
@@ -597,40 +583,42 @@ void Ui_CalendarWnd::OnMzCommand(WPARAM wParam, LPARAM lParam) {
 }
 void Ui_CalendarWnd::showTip(bool bshow){
 	//
-	LunarSolarDateTime _lstm(_year,_month,_day);
-	_lstm.SolarToLunar();
-	CMzString yi,ji;
-	bool ret = _lstm.HuangliYiJi(yi,ji);
-	tipdlg.setYiJiText(yi.C_Str(),ji.C_Str(),ret);
-	int row,col;
-	m_Calendar.getSelectedIndex(row,col);
-	RECT rcWork;// = MzGetWorkArea();
-	rcWork.left = 69 * col + 2;
-	if(col > 2){
-		rcWork.left = 480 - 320 - 10;
-	}
-	rcWork.top = m_Calendar.GetTopPos() + 69 * (row + 1) + 28;
-	if(row > 4){
-		rcWork.left += 69;
-		rcWork.top -= 69;
+	if(bshow){
+		m_Tipyiji.SetVisible(true);
 	}
 
-	rcWork.right = rcWork.left + 320;
-	rcWork.bottom = rcWork.top + 120;
+	if(m_Tipyiji.IsVisible()){
+		RECT r = m_Tipyiji.GetRect();
 
-
-	if(tipdlg.IsVisible()){
-		tipdlg.SetWindowPos(m_hWnd,rcWork.left, rcWork.bottom, RECT_WIDTH(rcWork), RECT_HEIGHT(rcWork));
-		tipdlg.Invalidate();
-		tipdlg.UpdateWindow();
-	}else{
-		if(bshow){
-			tipdlg.Create(rcWork.left, rcWork.bottom, RECT_WIDTH(rcWork), RECT_HEIGHT(rcWork),
-					m_hWnd, 0, WS_CHILD,0);
-			tipdlg.SetWindowPos(m_hWnd,rcWork.left, rcWork.bottom, RECT_WIDTH(rcWork), RECT_HEIGHT(rcWork));
-			// set the animation of the window
-			tipdlg.Show(true);
+		LunarSolarDateTime _lstm(_year,_month,_day);
+		_lstm.SolarToLunar();
+		CMzString yi,ji;
+		bool ret = _lstm.HuangliYiJi(yi,ji);
+		m_Tipyiji.setText(yi.C_Str(),ji.C_Str(),ret);
+		int row,col;
+		m_Calendar.getSelectedIndex(row,col);
+		RECT rcWork;
+		rcWork.left = 69 * col + 2;
+		if(col > 2){
+			rcWork.left = 480 - 320 - 10;
 		}
+		rcWork.top = m_Calendar.GetTopPos() + 69 * (row + 1) + 28;
+		if(row > 4){
+			rcWork.left += 69;
+			rcWork.top -= 69;
+		}
+
+		rcWork.right = rcWork.left + 320;
+		rcWork.bottom = rcWork.top + 120;
+		m_Tipyiji.SetPos(rcWork.left, rcWork.bottom, RECT_WIDTH(rcWork), RECT_HEIGHT(rcWork));
+
+		RECT r2 = m_Tipyiji.GetRect();
+
+		if(r.left != r2.left || r.top != r2.top){
+			Invalidate(&r);
+		}
+		m_Tipyiji.Invalidate();
+		m_Tipyiji.Update();
 	}
 }
 
@@ -640,28 +628,77 @@ LRESULT Ui_CalendarWnd::MzDefWndProc(UINT message, WPARAM wParam, LPARAM lParam)
 		{
 			int nID = LOWORD(wParam);
 			int nNotify = HIWORD(wParam);
-            int x = LOWORD(lParam);
-            int y = HIWORD(lParam);
-            if (nID == MZ_IDC_CALENDAR_GRID && nNotify == MZ_MN_LBUTTONDOWN) {
+            short x = LOWORD(lParam);
+            short y = HIWORD(lParam);
+			if(nID == MZ_IDC_YIJI_TIP && nNotify == MZ_MN_LBUTTONUP){
+				if (!m_Tipyiji.IsMouseDownAtScrolling() && !m_Tipyiji.IsMouseMoved()) {
+					if(m_Tipyiji.IsVisible()){
+						m_Tipyiji.SetVisible(false);
+						m_Tipyiji.Invalidate();
+						m_Tipyiji.Update();
+					}
+				}
+				return 0;
+			}
+            if (nNotify == MZ_MN_MOUSEMOVE) {
+				if(!_isMouseMoving){
+					_isMouseMoving = true;
+					_MouseX = x;
+					_MouseY = y;
+					return 0;
+				}
+			}
+
+            if (nNotify == MZ_MN_LBUTTONUP) {
+				if(_isMouseMoving){
+					_isMouseMoving = false;
+					if(x > _MouseX + 200 && y < _MouseY + 100 && y > _MouseY - 100){	//右移 下一月
+						DateTime::getNextDate(_year,_month);
+						_day = 1;
+					}
+					if(x < _MouseX - 200 && y < _MouseY + 100 && y > _MouseY - 100){	//左移 上一月
+						DateTime::getPreDate(_year,_month);
+						_day = 1;
+					}
+					if(y > _MouseY + 200 && x < _MouseX + 100 && x > _MouseX - 100){	//下移 下一年
+						_year++;
+						_day = 1;
+					}
+					if(y < _MouseY - 200 && x < _MouseX + 100 && x > _MouseX - 100){	//上移 上一年
+						_year--;
+						_day = 1;
+					}
+					updateGrid();
+					updateInfo();
+					showTip();
+					return 0;
+				}
+
                 if (!m_Calendar.IsMouseDownAtScrolling() && !m_Calendar.IsMouseMoved()) {
 					int r = 0;
 					int c = 0;
-					if( m_Calendar.calcSelectedIndex(x,y,r,c)){
+					bool force = false;
+					if(m_Calendar.calcSelectedIndex(x,y,r,c)){
+						if(sel_row == r && sel_col == c){
+							force = true;
+						}
 						//check if is invalid selection
 						CMzString s = m_Calendar.getText(r,c);
 						_day = _wtoi(s.C_Str());
 						if(s.Length() == 0){
 							return 0;
 						}
-						m_Calendar.setSelectedIndex(r,c);
-						m_Calendar.Invalidate();
-						m_Calendar.Update();
+						updateGrid();
+						//m_Calendar.setSelectedIndex(r,c);
+						//m_Calendar.Invalidate();
+						//m_Calendar.Update();
 						updateInfo();
-						showTip();
+						showTip(force);
 					}
                 }
                 return 0;
             }
+#if 0
             if (nID == MZ_IDC_CALENDAR_GRID && nNotify == MZ_MN_LBUTTONDBLCLK) {
                 if (!m_Calendar.IsMouseDownAtScrolling() && !m_Calendar.IsMouseMoved()) {
 					int r = 0;
@@ -678,6 +715,7 @@ LRESULT Ui_CalendarWnd::MzDefWndProc(UINT message, WPARAM wParam, LPARAM lParam)
                 }
                 return 0;
             }
+#endif
 			break;
 		}
     }
