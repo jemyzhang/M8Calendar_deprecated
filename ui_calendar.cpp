@@ -550,7 +550,9 @@ void Ui_CalendarWnd::OnMzCommand(WPARAM wParam, LPARAM lParam) {
 					// set the animation of the window
 					dlg.SetAnimateType_Show(MZ_ANIMTYPE_SCROLL_RIGHT_TO_LEFT_2);
 					dlg.SetAnimateType_Hide(MZ_ANIMTYPE_SCROLL_LEFT_TO_RIGHT_1);
+					MzBeginWaitDlg(m_hWnd);
 					dlg.setupdate(_month,_day);
+					MzEndWaitDlg();
 					dlg.DoModal();
 					break;
 				}

@@ -1,7 +1,7 @@
 #include "ui_calendar.h"
 
-#define VER_STRING L"1.5"
-#define BUILD_STRING L"20090526"
+#define VER_STRING L"1.4"
+#define BUILD_STRING L"20090527"
 #define APPNAME L"уфиое╘юЗ"
 
 // Application class derived from CMzApp
