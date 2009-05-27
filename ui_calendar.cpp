@@ -508,6 +508,7 @@ void Ui_CalendarWnd::OnMzCommand(WPARAM wParam, LPARAM lParam) {
 						dlg.getDate((DWORD &)_year,(DWORD &)_month,(DWORD &)_day);
 						updateGrid();
 						updateInfo();
+						showTip();
 					}
 					MzCloseSip();
 					break;
