@@ -66,7 +66,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions=" /subsystem:windowsce,6.00"
-				AdditionalDependencies="mzfc.lib PlatformApi.lib CallInterface.lib sqlitece_static.lib"
+				AdditionalDependencies="mzfc.lib PlatformApi.lib CallInterface.lib libsqlitece_s.lib"
 				OutputFile="$(OutDir)/M8Calendar.exe"
 				LinkIncremental="2"
 				DelayLoadDLLs="$(NOINHERIT)"

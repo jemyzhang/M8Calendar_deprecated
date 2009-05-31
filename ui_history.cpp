@@ -32,28 +32,90 @@ bool UI_HistoryWnd::ImportData(TCHAR* filename){
 	m_Progressdlg.SetShowInfo(true);
 	m_Progressdlg.SetRange(0,100);
 	m_Progressdlg.SetTitle(L"更新历史上的今天数据中，请稍后...");
-	m_Progressdlg.SetInfo(L"文件载入中");
+	m_Progressdlg.SetInfo(L"文件分析中");
 	m_Progressdlg.BeginProgress(m_hWnd);
 
 	TEXTENCODE_t enc = File::getTextCode(filename);
 
-	CMzString m_Text;
+	bool newsig = false;
+	bool newItem = false;
+	bool newContent = false;
+	CMzString titlestr,contentstr,m_Text;
+	int scnt = 0;
+	int ncnt = 0;
+	int nitems = 0;
+	unsigned int nbytes = 0;
+	calendar_db.beginTrans();
+
 	if(enc == ttcAnsi){
         ifstream file;
         file.open(filename,  ios::in | ios::binary);
         if (file.is_open())
         {
-                file.seekg(0, ios::end);
-                int nLen = file.tellg();
-                char *ss = new char[nLen+1];
-                file.seekg(0, ios::beg);
-                file.read(ss, nLen);
-                ss[nLen] = '\0';
-				wchar_t *wss;
-				File::chr2wch(ss,&wss);
-                m_Text = wss;
-				delete[] ss;
-				delete[] wss;
+            file.seekg(0, ios::end);
+            unsigned int nLen = file.tellg();
+            char *sbuf = new char[nLen+1];
+            file.seekg(0, ios::beg);
+			char ch;
+			while(file.get(ch)){
+				nbytes++;
+				if(ch == '#'){
+					//写入数据库
+					if(newContent){
+						newContent = false;
+						sbuf[ncnt] = 0;
+						wchar_t *wss;
+						File::chr2wch(sbuf,&wss);
+						CALENDAR_HISTORY_t item;
+						swscanf(titlestr.SubStr(0,8).C_Str(),L"%04d%02d%02d",&item.year,&item.month,&item.day);
+						item.title = titlestr.SubStr(9,titlestr.Length() - 9).C_Str();
+						item.content = wss;
+						calendar_db.appendHistory(&item);
+						nitems++;
+						ncnt = 0;
+						sbuf[ncnt] = 0;
+						memset(wss,0,lstrlen(wss)*2+1);
+						//memset(sbuf,0,nLen+1);
+						delete wss;
+						wchar_t info[32];
+						wsprintf(info,L"读入记录中...%d",nitems);
+						m_Progressdlg.SetInfo(info);
+						m_Progressdlg.SetCurValue(80 * nbytes / nLen);
+						m_Progressdlg.UpdateProgress();
+						//C::DoEvents();
+					}
+					if(newsig){
+						//
+						newsig = false;
+						newItem = true;
+						continue;
+					}else{
+						newsig = true;
+						continue;
+					}
+				}
+				if(ch == '\n' || ch == '\r'){
+					if(newItem){
+						newItem = false;
+						newContent = true;
+						if(ncnt != 0){
+							sbuf[ncnt] = 0;
+							wchar_t *wss;
+							File::chr2wch(sbuf,&wss);
+							titlestr = wss;
+							memset(wss,0,lstrlen(wss)*2+1);
+							delete wss;
+							ncnt = 0;
+							sbuf[ncnt] = 0;
+							//memset(sbuf,0,nLen+1);
+						}
+						continue;
+					}
+				}
+				sbuf[ncnt] = ch;
+				ncnt++;
+			}
+			delete[] sbuf;
         }
         file.close();
 	}else if(enc == ttcUnicode ||
@@ -62,83 +124,64 @@ bool UI_HistoryWnd::ImportData(TCHAR* filename){
         ofile.open(filename, ios::in | ios ::binary);
         if (ofile.is_open())
         {
-			ofile.seekg(0, ios::end);
-            int nLen = ofile.tellg();
+            ofile.seekg(0, ios::end);
+            unsigned int nLen = ofile.tellg();
             ofile.seekg(2, ios::beg);
-            wchar_t *tmpstr = new wchar_t[nLen + 1];
-            ofile.read(tmpstr, nLen);                        
-            tmpstr[nLen] = '\0';
-            m_Text = tmpstr;
-			delete[] tmpstr;
+			wchar_t wch;
+			while(ofile.get(wch)){
+				nbytes++;
+				if(wch == '#'){
+					//写入数据库
+					if(newContent){
+						newContent = false;
+						contentstr = m_Text;
+						CALENDAR_HISTORY_t item;
+						swscanf(titlestr.SubStr(0,8).C_Str(),L"%04d%02d%02d",&item.year,&item.month,&item.day);
+						item.title = titlestr.SubStr(9,titlestr.Length() - 9).C_Str();
+						item.content = contentstr.C_Str();
+						calendar_db.appendHistory(&item);
+						nitems++;
+						ncnt = 0;
+						m_Text.SetBufferSize(0);
+						wchar_t info[32];
+						wsprintf(info,L"读入记录中...%d",nitems);
+						m_Progressdlg.SetInfo(info);
+						m_Progressdlg.SetCurValue(80 * nbytes / nLen);
+						m_Progressdlg.UpdateProgress();
+						//C::DoEvents();
+					}
+					if(newsig){
+						//
+						newsig = false;
+						newItem = true;
+						continue;
+					}else{
+						newsig = true;
+						continue;
+					}
+				}
+				if(wch == '\n' || wch == '\r'){
+					if(newItem){
+						newItem = false;
+						newContent = true;
+						if(ncnt != 0){
+							titlestr = m_Text;
+							ncnt = 0;
+							m_Text.SetBufferSize(0);
+						}
+						continue;
+					}
+				}
+				wchar_t wstr[2] = {wch, 0};
+				m_Text = m_Text + wstr;
+				ncnt++;
+			}
 		}
         ofile.close();
 	}
 
-	m_Progressdlg.SetInfo(L"文件分析中");
-	m_Progressdlg.SetCurValue(20);
-	m_Progressdlg.UpdateProgress();
-	//导入数据
-	wchar_t *pstr = m_Text.C_Str();
-	bool newsig = false;
-	bool newItem = false;
-	bool newContent = false;
-	CMzString titlestr,contentstr;
-	wchar_t wch = 0;
-	int scnt = 0;
-	int npos = 0;
-	int ncnt = 0;
-	int nitems = 0;
-	calendar_db.beginTrans();
-	do{
-		wch = pstr[scnt++];
-		if(wch == '#'){
-			//写入数据库
-			if(newContent){
-				newContent = false;
-				contentstr = m_Text.SubStr(npos,ncnt);
-				CALENDAR_HISTORY_t item;
-				swscanf(titlestr.SubStr(0,8).C_Str(),L"%04d%02d%02d",&item.year,&item.month,&item.day);
-				item.title = titlestr.SubStr(9,titlestr.Length() - 9).C_Str();
-				item.content = contentstr.C_Str();
-				calendar_db.appendHistory(&item);
-				nitems++;
-				npos += ncnt;
-				ncnt = 0;
-				wchar_t info[32];
-				wsprintf(info,L"读入记录中...%d",nitems);
-				m_Progressdlg.SetInfo(info);
-				m_Progressdlg.UpdateProgress();
-			}
-			if(newsig){
-				//
-				newsig = false;
-				newItem = true;
-				npos++;
-				continue;
-			}else{
-				newsig = true;
-				npos++;
-				continue;
-			}
-		}
-		if(wch == '\n' || wch == '\r'){
-			if(newItem){
-				newItem = false;
-				newContent = true;
-				if(ncnt != 0){
-					titlestr = m_Text.SubStr(npos,ncnt);
-					npos += (ncnt+1);
-					ncnt = 0;
-				}else{
-					npos++;	//忽略换行符
-				}
-				continue;
-			}
-		}
-		ncnt++;
-	}while(wch != '\0');
 	m_Progressdlg.SetInfo(L"写入数据中...");
-	m_Progressdlg.SetCurValue(40);
+	m_Progressdlg.SetCurValue(85);
 	m_Progressdlg.UpdateProgress();
 	calendar_db.commitTrans();
 //	m_Progressdlg.SetInfo(L"数据优化中...");
@@ -146,7 +189,7 @@ bool UI_HistoryWnd::ImportData(TCHAR* filename){
 //	m_Progressdlg.UpdateProgress();
 	calendar_db.reorgDatebase();
 	m_Progressdlg.SetInfo(L"创建索引...");
-	m_Progressdlg.SetCurValue(80);
+	m_Progressdlg.SetCurValue(90);
 	m_Progressdlg.UpdateProgress();
 	calendar_db.indexDatabase();
 	m_Progressdlg.SetInfo(L"更新完成");

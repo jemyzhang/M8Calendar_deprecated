@@ -204,6 +204,7 @@ wchar_t* MZ_CommonFile::chr2wch(const char* buffer, wchar_t** wbuf)
       size_t wlen = MultiByteToWideChar(CP_ACP, 0, (const char*)buffer, int(len), NULL, 0); 
       wchar_t *wBuf = new wchar_t[wlen + 1]; 
       MultiByteToWideChar(CP_ACP, 0, (const char*)buffer, int(len), wBuf, int(wlen));
+	  wBuf[wlen+1] = 0;
 	  *wbuf = wBuf;
 	  return wBuf;
 } 
