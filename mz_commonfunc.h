@@ -46,15 +46,6 @@ public:
 		header += (cnt-1 + delimLen);
 		return retval;
 	}
-	static void DoEvents(){
-		//Do Events
-		MSG msg;  
-		while(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE) )  
-		{  
-			TranslateMessage(   &msg   );  
-			DispatchMessage(   &msg   );  
-		}
-	}
 };
 
 class MZ_CommonDateTime

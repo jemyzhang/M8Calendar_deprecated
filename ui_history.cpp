@@ -39,6 +39,7 @@ bool UI_HistoryWnd::ImportData(TCHAR* filename){
 
 	bool newsig = false;
 	bool newItem = false;
+	bool newItemCr = false;	//去除标题的第二个换行
 	bool newContent = false;
 	CMzString titlestr,contentstr,m_Text;
 	int scnt = 0;
@@ -59,6 +60,14 @@ bool UI_HistoryWnd::ImportData(TCHAR* filename){
 			char ch;
 			while(file.get(ch)){
 				nbytes++;
+				if(newItemCr){
+					if(ch == '\n' || ch == '\r'){
+						continue;
+					}else{
+						newItemCr = false;
+						newContent = true;
+					}
+				}
 				if(ch == '#'){
 					//写入数据库
 					if(newContent){
@@ -97,7 +106,7 @@ bool UI_HistoryWnd::ImportData(TCHAR* filename){
 				if(ch == '\n' || ch == '\r'){
 					if(newItem){
 						newItem = false;
-						newContent = true;
+						newItemCr = true;
 						if(ncnt != 0){
 							sbuf[ncnt] = 0;
 							wchar_t *wss;
@@ -130,6 +139,14 @@ bool UI_HistoryWnd::ImportData(TCHAR* filename){
 			wchar_t wch;
 			while(ofile.get(wch)){
 				nbytes++;
+				if(newItemCr){
+					if(wch == '\n' || wch == '\r'){
+						continue;
+					}else{
+						newItemCr = false;
+						newContent = true;
+					}
+				}
 				if(wch == '#'){
 					//写入数据库
 					if(newContent){
@@ -163,7 +180,7 @@ bool UI_HistoryWnd::ImportData(TCHAR* filename){
 				if(wch == '\n' || wch == '\r'){
 					if(newItem){
 						newItem = false;
-						newContent = true;
+						newItemCr = true;
 						if(ncnt != 0){
 							titlestr = m_Text;
 							ncnt = 0;
@@ -399,7 +416,7 @@ void UiHistoryList::DrawItem(HDC hdcDst, int nIndex, RECT* prcItem, RECT *prcWin
 	Rect01.top = rcText.top; Rect01.bottom = Rect01.top + (rcText.bottom - rcText.top)/2;
 	Rect01.left = rcText.left; Rect01.right = rcText.right;
 	wchar_t datestr[16];
-	wsprintf(datestr,L"(%d年%d月%d日)",ph->year,ph->month,ph->day);
+	wsprintf(datestr,L"[%d年]",ph->year);
 	CMzString s = ph->title;
 	s = s + datestr;
 	MzDrawText( hdcDst , s.C_Str(), &Rect01 , DT_LEFT|DT_SINGLELINE|DT_VCENTER|DT_END_ELLIPSIS );
