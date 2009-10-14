@@ -1,6 +1,6 @@
 #include "ui_calendar.h"
-#include "mz_commonfunc.h"
-using namespace MZ_CommonFunc;
+#include "..\MzCommon\MzCommon.h"
+using namespace MzCommon;
 
 #include "ui_about.h"
 #include "ui_dateEdit.h"
@@ -267,11 +267,11 @@ void UiGrid::PaintWin(HDC hdcDst, RECT* prcWin, RECT* prcUpdate){
 			int cy = _y;
 			for(int j = 0; j < _cols; j++){
 				//格子
-				CRect rect(cx + (_gridw-1)*j,cy + (_gridh-1)*i,cx + _gridw*j + _gridw,cy + _gridh*i + _gridh);
+				RECT rect = {cx + (_gridw-1)*j,cy + (_gridh-1)*i,cx + _gridw*j + _gridw,cy + _gridh*i + _gridh};
 				Rectangle(pMemDC,rect.left,rect.top,rect.right,rect.bottom);
 				//格子背景
-				CRect frect(rect.left+1,rect.top + 1,rect.right - 2,rect.bottom - 2);
-				CRect textrect(rect.left+1,rect.top + 1,rect.right - 2,rect.bottom - 20);
+				RECT frect = {rect.left+1,rect.top + 1,rect.right - 2,rect.bottom - 2};
+				RECT textrect = {rect.left+1,rect.top + 1,rect.right - 2,rect.bottom - 20};
 				HBRUSH bqbrush;
 				if(_grids[i][j].isSelected){	//selected
 					::SetTextColor(pMemDC,_seltxt);
@@ -289,7 +289,7 @@ void UiGrid::PaintWin(HDC hdcDst, RECT* prcWin, RECT* prcUpdate){
 				font = FontHelper::GetFont(_grids[i][j].text1Size);
 				SelectObject(pMemDC,font);
 				::SetTextColor(pMemDC,_grids[i][j].text1Color);
-				CRect text1rect(rect.left+1,rect.top + 35,rect.right - 2,rect.bottom - 2);
+				RECT text1rect = {rect.left+1,rect.top + 35,rect.right - 2,rect.bottom - 2};
 				MzDrawText( pMemDC,_grids[i][j].text1.C_Str(), &text1rect, DT_CENTER|DT_VCENTER );
 				DeleteObject(font);
 			}

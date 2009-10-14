@@ -218,10 +218,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\mz_commonfunc.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\ui_about.cpp"
 				>
 			</File>
@@ -241,6 +237,18 @@
 				RelativePath=".\ui_history.cpp"
 				>
 			</File>
+			<Filter
+				Name="MzCommon"
+				>
+				<File
+					RelativePath="..\MzCommon\MzCommon.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\MzCommon\MzConfig.cpp"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Í·ÎÄ¼þ"
@@ -257,10 +265,6 @@
 			</File>
 			<File
 				RelativePath=".\m8calendar.h"
-				>
-			</File>
-			<File
-				RelativePath=".\mz_commonfunc.h"
 				>
 			</File>
 			<File
@@ -292,6 +296,18 @@
 				>
 				<File
 					RelativePath=".\sqlite3\sqlite3.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="MzCommon"
+				>
+				<File
+					RelativePath="..\MzCommon\MzCommon.h"
+					>
+				</File>
+				<File
+					RelativePath="..\MzCommon\MzConfig.h"
 					>
 				</File>
 			</Filter>

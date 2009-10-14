@@ -1,6 +1,6 @@
 #include "ui_config.h"
-#include "mz_commonfunc.h"
-using namespace MZ_CommonFunc;
+#include "..\MzCommon\MzCommon.h"
+using namespace MzCommon;
 
 #include "ReadWriteIni.h"
 #define MZ_IDC_TOOLBAR_MAIN 101

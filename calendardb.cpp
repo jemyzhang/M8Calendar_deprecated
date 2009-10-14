@@ -1,7 +1,7 @@
 #include "calendardb.h"
 //#include "pinyin_sort.h"
-#include "mz_commonfunc.h"
-using namespace MZ_CommonFunc;
+#include "..\MzCommon\MzCommon.h"
+using namespace MzCommon;
 
 clsCalendarDB::clsCalendarDB() {
 }

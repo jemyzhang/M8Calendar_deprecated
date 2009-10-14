@@ -1,6 +1,6 @@
 #include "ui_history.h"
-#include "mz_commonfunc.h"
-using namespace MZ_CommonFunc;
+#include "..\MzCommon\MzCommon.h"
+using namespace MzCommon;
 #include <Mzfc/MzProgressDialog.h> 
 #include <fstream>
 

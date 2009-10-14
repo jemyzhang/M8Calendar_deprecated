@@ -2,7 +2,6 @@
 
 // include the MZFC library header file
 #include <mzfc_inc.h>
-#include "mz_commonfunc.h"
 #include <list>
 #include "lunarsolardatetime.h"
 

@@ -1,9 +1,9 @@
 #include "ui_dateEdit.h"
-#include "mz_commonfunc.h"
+#include "..\MzCommon\MzCommon.h"
 
 #include "lunarsolardatetime.h"
 
-using namespace MZ_CommonFunc;
+using namespace MzCommon;
 
 MZ_IMPLEMENT_DYNAMIC(Ui_ToDateWnd)
 

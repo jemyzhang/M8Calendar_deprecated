@@ -524,19 +524,19 @@ CMzString LunarSolarDateTime::GanZhiMonth(unsigned char *gan, unsigned char *zhi
 	}else{
 		unsigned char yearGan;
 		GanZhiYear(&yearGan);
-		monthGanz = Zhi[(2 + lunar.month - 1) % 12];
 
 		if(yearGan == 0 || yearGan == 5){
-			monthGanz = monthGanz + Gan[(2 + lunar.month - 1) % 10];
+			monthGanz = Gan[(2 + lunar.month - 1) % 10];
 		}else if(yearGan == 1 || yearGan == 6){
-			monthGanz = monthGanz + Gan[(4 + lunar.month - 1) % 10];
+			monthGanz = Gan[(4 + lunar.month - 1) % 10];
 		}else if(yearGan == 2 || yearGan == 7){
-			monthGanz = monthGanz + Gan[(6 + lunar.month - 1) % 10];
+			monthGanz = Gan[(6 + lunar.month - 1) % 10];
 		}else if(yearGan == 3 || yearGan == 8){
-			monthGanz = monthGanz + Gan[(8 + lunar.month - 1) % 10];
+			monthGanz = Gan[(8 + lunar.month - 1) % 10];
 		}else if(yearGan == 4 || yearGan == 9){
-			monthGanz = monthGanz + Gan[(0 + lunar.month - 1) % 10];
+			monthGanz = Gan[(0 + lunar.month - 1) % 10];
 		}
+		monthGanz = monthGanz + Zhi[(2 + lunar.month - 1) % 12];
 	}
 	return monthGanz;
 }

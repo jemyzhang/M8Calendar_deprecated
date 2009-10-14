@@ -1,10 +1,10 @@
 #include "m8calendar.h"
-#include "mz_commonfunc.h"
+#include "..\MzCommon\MzCommon.h"
 //#include "ui_reminder.h"
 //#include "ui_password.h"
 //#include <MotorVibrate.h>
 
-using namespace MZ_CommonFunc;
+using namespace MzCommon;
 // The global variable of the application.
 M8CashApp theApp;
 //CashReminder calendar_reminder;
