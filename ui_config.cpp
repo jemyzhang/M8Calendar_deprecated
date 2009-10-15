@@ -19,7 +19,6 @@ const wchar_t* JIEQIMODESTR[] = {
 
 Ui_ConfigWnd::Ui_ConfigWnd(){
 	_viewMode = 0;
-	_JieqiOrder = AppConfig.IniJieqiOrder.Get();
 }
 
 BOOL Ui_ConfigWnd::OnInitDialog() {
@@ -73,6 +72,7 @@ BOOL Ui_ConfigWnd::OnInitDialog() {
 }
 
 void Ui_ConfigWnd::updateUi(){
+    _JieqiOrder = AppConfig.IniJieqiOrder.Get();
 	m_BtnJieqi.SetText2(JIEQIMODESTR[_JieqiOrder]);
 	m_BtnJieqi.Invalidate();
 	m_BtnJieqi.Update();

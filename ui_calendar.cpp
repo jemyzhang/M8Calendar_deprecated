@@ -294,7 +294,6 @@ void UiGrid::PaintWin(HDC hdcDst, RECT* prcWin, RECT* prcUpdate){
 
 Ui_CalendarWnd::Ui_CalendarWnd(void)
 {
-	_showMonthByJieqi = AppConfig.IniJieqiOrder.Get();
 	_isMouseMoving = false;
 }
 
@@ -721,6 +720,7 @@ void Ui_CalendarWnd::updateInfo(bool forceupdate){
 	static int y = 0;
 	static int m = 0;
 	static int d = 0;
+    _showMonthByJieqi = AppConfig.IniJieqiOrder.Get();
 	if(y != _year || 
 		m != _month ||
 		d != _day || forceupdate){
