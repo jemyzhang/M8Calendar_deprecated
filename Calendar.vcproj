@@ -248,6 +248,10 @@
 					RelativePath="..\MzCommon\MzConfig.cpp"
 					>
 				</File>
+				<File
+					RelativePath="..\MzCommon\UiImage.cpp"
+					>
+				</File>
 			</Filter>
 		</Filter>
 		<Filter
@@ -308,6 +312,10 @@
 				</File>
 				<File
 					RelativePath="..\MzCommon\MzConfig.h"
+					>
+				</File>
+				<File
+					RelativePath="..\MzCommon\UiImage.h"
 					>
 				</File>
 			</Filter>

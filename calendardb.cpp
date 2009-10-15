@@ -72,9 +72,29 @@ void clsCalendarDB::clean(){
 	clearHistorySearchResults();
 }
 
+bool clsCalendarDB::HistoryExists(CALENDAR_HISTORY_ptr his) {
+	bool nRet = true;
+    int rc = 0;
+    wsprintf(sqlcmdw, L"SELECT COUNT(*) FROM "TABLE_HISTORY
+		L" WHERE YEAR=%d AND MONTH=%d AND DAY=%d AND TITLE='%s'",
+		his->year,his->month,his->day,
+		his->title);
+	rc = sqlite3_prepare16(db,sqlcmdw,-1,&pStmt,&pzTail);
+    if (!rc) {
+		rc = sqlite3_step(pStmt);
+		if(rc != SQLITE_DONE){
+			nRet = sqlite3_column_int(pStmt, 0) > 0;
+		}
+    }
+    sqlite3_finalize(pStmt);
+    return nRet;
+}
+
 int clsCalendarDB::appendHistory(CALENDAR_HISTORY_ptr his) {
     int rc = 0;
-    wchar_t cmdtemp[256];
+//	if(HistoryExists(his)) return rc;	//ÖØ¸´¼ÇÂ¼
+
+	wchar_t cmdtemp[256];
 
     wsprintf(cmdtemp, L"INSERT INTO %s %s", TABLE_HISTORY, HISTORY_TBL_INSERT);
     wsprintf(sqlcmdw, cmdtemp,
@@ -153,9 +173,9 @@ bool clsCalendarDB::searchHistory(const wchar_t* sqlcmdw){
     if (sqlite3_prepare16(db, sqlcmdw, -1, &pStmt, &pzTail) == SQLITE_OK) {
         while (sqlite3_step(pStmt) == SQLITE_ROW) {
             CALENDAR_HISTORY_ptr h = new CALENDAR_HISTORY_t;
-            h->year = _wtoi((LPWSTR) sqlite3_column_text16(pStmt, 0));
-            h->month = _wtoi((LPWSTR) sqlite3_column_text16(pStmt, 1));
-            h->day = _wtoi((LPWSTR) sqlite3_column_text16(pStmt, 2));
+            h->year = sqlite3_column_int(pStmt, 0);
+            h->month = sqlite3_column_int(pStmt, 1);
+            h->day = sqlite3_column_int(pStmt, 2);
 
 			C::newstrcpy(&h->title,(LPWSTR) sqlite3_column_text16(pStmt, 3));
 			C::newstrcpy(&h->content,(LPWSTR) sqlite3_column_text16(pStmt, 4),30);

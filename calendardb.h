@@ -45,7 +45,7 @@ private:
     sqlite3* db;
 	sqlite3_stmt* pStmt;
 	const void* pzTail;
-	wchar_t sqlcmdw[512];
+	wchar_t sqlcmdw[512*10];
 protected:
     void connectDatabase(const wchar_t*);
     void disconnectDatabase();
@@ -57,6 +57,7 @@ protected:
 private:
 	void clearHistorySearchResults();
 public:
+	bool HistoryExists(CALENDAR_HISTORY_ptr his);
 	int appendHistory(CALENDAR_HISTORY_ptr his);
 	bool getHistoryListByDate(int month = -1,int day = -1);
 	CALENDAR_HISTORY_ptr historyByIndex(int index);

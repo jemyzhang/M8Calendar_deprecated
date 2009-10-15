@@ -47,5 +47,6 @@ private:
 	DWORD _month,_day;
 	bool _detailViewMode;
 private:
+    UINT identHistodayLine(LPTSTR linetext);    //分析行文字的类别 0: 无效 1: 标题 2: 内容
 	bool ImportData(TCHAR* filename);
 };
