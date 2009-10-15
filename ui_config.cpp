@@ -60,8 +60,7 @@ BOOL Ui_ConfigWnd::OnInitDialog() {
 	m_ScrollWin.AddChild(&m_DetailList);
 
 	m_Toolbar.SetPos(0, GetHeight() - MZM_HEIGHT_TEXT_TOOLBAR, GetWidth(), MZM_HEIGHT_TEXT_TOOLBAR);
-	m_Toolbar.SetButton(0, true, true, L"取消");
-	m_Toolbar.SetButton(2, true, true, L"确定");
+	m_Toolbar.SetButton(0, true, true, L"返回");
 	m_Toolbar.EnableLeftArrow(true);
     m_Toolbar.SetID(MZ_IDC_TOOLBAR_MAIN);
     AddUiWin(&m_Toolbar);
@@ -72,7 +71,7 @@ BOOL Ui_ConfigWnd::OnInitDialog() {
 }
 
 void Ui_ConfigWnd::updateUi(){
-    _JieqiOrder = AppConfig.IniJieqiOrder.Get();
+    int _JieqiOrder = AppConfig.IniJieqiOrder.Get();
 	m_BtnJieqi.SetText2(JIEQIMODESTR[_JieqiOrder]);
 	m_BtnJieqi.Invalidate();
 	m_BtnJieqi.Update();
@@ -111,7 +110,7 @@ LRESULT Ui_ConfigWnd::MzDefWndProc(UINT message, WPARAM wParam, LPARAM lParam) {
 					if(nIndex != -1){
 						if(_viewMode == 1){
 							if(nIndex < 2){
-								_JieqiOrder = nIndex;
+								AppConfig.IniJieqiOrder.Set(nIndex);
 							}
 						}
 						_viewMode = 0;
@@ -143,12 +142,6 @@ void Ui_ConfigWnd::OnMzCommand(WPARAM wParam, LPARAM lParam) {
             int nIndex = lParam;
             if (nIndex == 0) {
                 // exit the modal dialog
-                EndModal(ID_CANCEL);
-                return;
-            }
-            if (nIndex == 2) {
-                // exit the modal dialog
-				AppConfig.IniJieqiOrder.Set(_JieqiOrder);
                 EndModal(ID_OK);
                 return;
             }

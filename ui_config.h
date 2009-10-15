@@ -42,7 +42,6 @@ protected:
     // override the MZFC command handler
     virtual void OnMzCommand(WPARAM wParam, LPARAM lParam);
 private:
-	int _JieqiOrder;
 	int _viewMode;
 };
 
