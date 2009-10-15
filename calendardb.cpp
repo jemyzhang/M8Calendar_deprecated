@@ -94,15 +94,18 @@ int clsCalendarDB::appendHistory(CALENDAR_HISTORY_ptr his) {
     int rc = 0;
 //	if(HistoryExists(his)) return rc;	//ÖØ¸´¼ÇÂ¼
 
-	wchar_t cmdtemp[256];
-
-    wsprintf(cmdtemp, L"INSERT INTO %s %s", TABLE_HISTORY, HISTORY_TBL_INSERT);
-    wsprintf(sqlcmdw, cmdtemp,
+    wsprintf(sqlcmdw, L"INSERT INTO "TABLE_HISTORY
+        L" "HISTORY_TBL_INSERT,
 		his->year,his->month,his->day,
-		his->title,his->content);
+		his->title);
 	rc = sqlite3_prepare16(db,sqlcmdw,-1,&pStmt,&pzTail);
-    if (!rc) {
+    if (rc == SQLITE_OK) {
+        rc = sqlite3_bind_text16(pStmt,1,his->content,lstrlen(his->content) * sizeof(his->content[0]),SQLITE_TRANSIENT);
 		rc = sqlite3_step(pStmt);
+    }else{
+        int test = lstrlen(his->content);
+        int test2 = lstrlen(sqlcmdw);
+        int a= 0;
     }
 	rc = sqlite3_finalize(pStmt);
     return rc;

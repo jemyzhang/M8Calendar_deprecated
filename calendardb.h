@@ -17,7 +17,7 @@ using namespace std;
 
 #define TABLE_HISTORY	L"HISTORY_v1"
 #define HISTORY_TBL_ITEM L"YEAR numeric not null,MONTH numeric not null,DAY numeric not null,TITLE text NOT NULL primary key,CONTENT text NOT NULL"
-#define HISTORY_TBL_INSERT L"(YEAR,MONTH,DAY,TITLE,CONTENT) values(%d,%d,%d,\"%s\",\"%s\")"
+#define HISTORY_TBL_INSERT L"(YEAR,MONTH,DAY,TITLE,CONTENT) values(%d,%d,%d,'%s',?)"
 
 typedef struct CALENDAR_HISTORY {
     DWORD year;
@@ -45,7 +45,7 @@ private:
     sqlite3* db;
 	sqlite3_stmt* pStmt;
 	const void* pzTail;
-	wchar_t sqlcmdw[512*10];
+	wchar_t sqlcmdw[512];
 protected:
     void connectDatabase(const wchar_t*);
     void disconnectDatabase();

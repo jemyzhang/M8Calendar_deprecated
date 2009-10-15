@@ -90,6 +90,7 @@ bool UI_HistoryWnd::ImportData(TCHAR* filename){
                             }
                             newEntryTitle = true;
                             wchar_t * wtitle = wss + 8 + 2 + 1;   //略过日期和##和空格
+                            wtitle[lstrlen(wtitle) - 1] = '\0';
                             C::newstrcpy(&item.title,wtitle);
                             wchar_t *wdate = wss + 2;//略过##
                             wdate[8] = '\0';    //删除日期后内容
@@ -99,15 +100,19 @@ bool UI_HistoryWnd::ImportData(TCHAR* filename){
                         case 2://内容
                             newEntryContent = true;
                             if(item.content == NULL){
-                                int wlen = lstrlen(wss) + 1;
+                                int wlen = lstrlen(wss) + 2;
                                 item.content = new wchar_t[wlen];
                                 wcscpy_s(item.content,wlen,wss);
+                                item.content[wlen - 2] = '\n';
+                                item.content[wlen - 1] = '\0';
                             }else{
                                 wchar_t *strtmp = item.content;
-                                int wlen = lstrlen(wss) + 1 + lstrlen(strtmp);
+                                int wlen = lstrlen(wss) + 2 + lstrlen(strtmp);
                                 item.content = new wchar_t[wlen];
                                 wcscpy_s(item.content,wlen,strtmp);
                                 wcscat_s(item.content,wlen,wss);
+                                item.content[wlen - 2] = '\n';
+                                item.content[wlen - 1] = '\0';
                                 delete [] strtmp;
                             }
                             break;
@@ -157,6 +162,7 @@ bool UI_HistoryWnd::ImportData(TCHAR* filename){
                             }
                             newEntryTitle = true;
                             wchar_t * wtitle = sbuf + 8 + 2 + 1;   //略过日期和##
+                            wtitle[lstrlen(wtitle) - 1] = '\0';//去除回车符
                             C::newstrcpy(&item.title,wtitle);
                             wchar_t *wdate = sbuf + 2;//略过##
                             wdate[8] = '\0';    //删除日期后内容
@@ -166,15 +172,19 @@ bool UI_HistoryWnd::ImportData(TCHAR* filename){
                         case 2://内容
                             newEntryContent = true;
                             if(item.content == NULL){
-                                int wlen = lstrlen(sbuf) + 1;
+                                int wlen = lstrlen(sbuf) + 2;
                                 item.content = new wchar_t[wlen];
                                 wcscpy_s(item.content,wlen,sbuf);
+                                item.content[wlen - 2] = '\n';
+                                item.content[wlen - 1] = '\0';
                             }else{
                                 wchar_t *strtmp = item.content;
-                                int wlen = lstrlen(sbuf) + 1 + lstrlen(strtmp);
+                                int wlen = lstrlen(sbuf) + 2 + lstrlen(strtmp);
                                 item.content = new wchar_t[wlen];
                                 wcscpy_s(item.content,wlen,strtmp);
                                 wcscat_s(item.content,wlen,sbuf);
+                                item.content[wlen - 2] = '\n';
+                                item.content[wlen - 1] = '\0';
                                 delete [] strtmp;
                             }
                             break;
@@ -195,18 +205,18 @@ bool UI_HistoryWnd::ImportData(TCHAR* filename){
 	m_Progressdlg.SetCurValue(85);
 	m_Progressdlg.UpdateProgress();
 	calendar_db.commitTrans();
-	m_Progressdlg.SetInfo(L"数据优化中...");
-	m_Progressdlg.SetCurValue(90);
-	m_Progressdlg.UpdateProgress();
-	calendar_db.reorgDatebase();
+//	m_Progressdlg.SetInfo(L"数据优化中...");
+//	m_Progressdlg.SetCurValue(90);
+//	m_Progressdlg.UpdateProgress();
+//	calendar_db.reorgDatebase();
 //	m_Progressdlg.SetInfo(L"创建索引...");
 //	m_Progressdlg.SetCurValue(90);
-	m_Progressdlg.UpdateProgress();
-	calendar_db.indexDatabase();
+//	m_Progressdlg.UpdateProgress();
+//	calendar_db.indexDatabase();
 	m_Progressdlg.SetInfo(L"更新完成");
 	m_Progressdlg.SetCurValue(100);
 	m_Progressdlg.EndProgress();
-	//File::DelFile(filename);
+	File::DelFile(filename);
 	return true;
 }
 
@@ -412,12 +422,11 @@ void UiHistoryList::DrawItem(HDC hdcDst, int nIndex, RECT* prcItem, RECT *prcWin
 	SelectObject(hdcDst,hf);
 	Rect01.top = rcText.top; Rect01.bottom = Rect01.top + (rcText.bottom - rcText.top)/2;
 	Rect01.left = rcText.left; Rect01.right = rcText.right;
-	wchar_t datestr[16];
-	wsprintf(datestr,L"[%d年]",ph->year);
-	CMzString s = ph->title;
-	s = s + datestr;
-	MzDrawText( hdcDst , s.C_Str(), &Rect01 , DT_LEFT|DT_SINGLELINE|DT_VCENTER|DT_END_ELLIPSIS );
+    wchar_t *titlestr = new wchar_t[lstrlen(ph->title) + 1 + 16];
+    wsprintf(titlestr,L"[%04d年] %s",ph->year,ph->title);
+	MzDrawText( hdcDst , titlestr, &Rect01 , DT_LEFT|DT_SINGLELINE|DT_VCENTER|DT_END_ELLIPSIS );
 	DeleteObject( hf );
+    delete [] titlestr;
 
 	//内容
 	cr = RGB(0,0,0);
@@ -425,8 +434,7 @@ void UiHistoryList::DrawItem(HDC hdcDst, int nIndex, RECT* prcItem, RECT *prcWin
 	SelectObject(hdcDst,hf);
 	Rect02.top = Rect01.bottom; Rect02.bottom = rcText.bottom;
 	Rect02.left = rcText.left; Rect02.right = rcText.right;
-	s = ph->content;
-	MzDrawText( hdcDst , s.SubStr(0,30).C_Str(), &Rect02 , DT_LEFT|DT_SINGLELINE|DT_VCENTER|DT_END_ELLIPSIS );
+	MzDrawText( hdcDst , ph->content, &Rect02 , DT_LEFT|DT_SINGLELINE|DT_VCENTER|DT_END_ELLIPSIS );
 	DeleteObject( hf );
 }
 
