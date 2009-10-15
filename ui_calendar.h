@@ -4,6 +4,7 @@
 #include <mzfc_inc.h>
 #include <list>
 #include "lunarsolardatetime.h"
+#include "../MzCommon/UiImage.h"
 
 #define GRID_USE_UILIST 0
 #if GRID_USE_UILIST
@@ -85,27 +86,6 @@ private:
 	bool _isTs;	//Ãÿ ‚
 };
 
-class UiImage : public UiWin
-{
-public:
-	UiImage(void){
-		_reqUpdate = true;
-		pimg = 0;
-	}
-	~UiImage(void){
-	}
-	void setupImage(ImagingHelper* img) {
-		pimg = img;
-	}
-	virtual void PaintWin(HDC hdcDst, RECT* prcWin, RECT* prcUpdate);
-	virtual void Update() {
-		_reqUpdate = true;
-		UiWin::Update();
-	}
-private:
-	bool _reqUpdate;
-	ImagingHelper *pimg;
-};
 class UiGrid : public UiWin
 {
 public:

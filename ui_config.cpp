@@ -2,12 +2,13 @@
 #include "..\MzCommon\MzCommon.h"
 using namespace MzCommon;
 
-#include "ReadWriteIni.h"
 #define MZ_IDC_TOOLBAR_MAIN 101
 #define MZ_IDC_SCROLLWIN 102
 
 #define MZ_IDC_BUTTON_JIEQI_MODE 103
 #define MZ_IDC_LIST_CONFIG 104
+
+CalendarConfig AppConfig;
 
 MZ_IMPLEMENT_DYNAMIC(Ui_ConfigWnd)
 
@@ -16,13 +17,9 @@ const wchar_t* JIEQIMODESTR[] = {
 	L"以节气交界日为起点",
 };
 
-int Ui_ConfigWnd::_jieqiShowMode = 0;
-
 Ui_ConfigWnd::Ui_ConfigWnd(){
 	_viewMode = 0;
-	//从数据库载入设置
-	//TODO
-	_jieqiShowMode = getJieqiMode();
+	_JieqiOrder = AppConfig.IniJieqiOrder.Get();
 }
 
 BOOL Ui_ConfigWnd::OnInitDialog() {
@@ -76,7 +73,7 @@ BOOL Ui_ConfigWnd::OnInitDialog() {
 }
 
 void Ui_ConfigWnd::updateUi(){
-	m_BtnJieqi.SetText2(JIEQIMODESTR[_jieqiShowMode]);
+	m_BtnJieqi.SetText2(JIEQIMODESTR[_JieqiOrder]);
 	m_BtnJieqi.Invalidate();
 	m_BtnJieqi.Update();
 
@@ -93,7 +90,7 @@ void Ui_ConfigWnd::updateUi(){
 			m_DetailList.AddItem(li);
 		}
 		m_ScrollWin.SetPos(0, MZM_HEIGHT_BUTTONEX + MZM_HEIGHT_CAPTION, GetWidth(), GetHeight() - MZM_HEIGHT_TEXT_TOOLBAR);
-        m_DetailList.SetSelectedIndex(_jieqiShowMode);
+        m_DetailList.SetSelectedIndex(_JieqiOrder);
 		m_ScrollWin.SetVisible(true);
 	}
 	Invalidate();
@@ -114,7 +111,7 @@ LRESULT Ui_ConfigWnd::MzDefWndProc(UINT message, WPARAM wParam, LPARAM lParam) {
 					if(nIndex != -1){
 						if(_viewMode == 1){
 							if(nIndex < 2){
-								_jieqiShowMode = nIndex;
+								_JieqiOrder = nIndex;
 							}
 						}
 						_viewMode = 0;
@@ -151,7 +148,7 @@ void Ui_ConfigWnd::OnMzCommand(WPARAM wParam, LPARAM lParam) {
             }
             if (nIndex == 2) {
                 // exit the modal dialog
-				setJieqiMode(_jieqiShowMode);
+				AppConfig.IniJieqiOrder.Set(_JieqiOrder);
                 EndModal(ID_OK);
                 return;
             }
@@ -160,28 +157,3 @@ void Ui_ConfigWnd::OnMzCommand(WPARAM wParam, LPARAM lParam) {
     }
 }
 
-int Ui_ConfigWnd::getJieqiMode(){
-	wchar_t currpath[128];
-	wchar_t ini_path[255];
-	int mode = 0;
-	if(File::GetCurrentPath(currpath)){
-		wsprintf(ini_path,L"%s\\m8calendar.ini",currpath);
-	}
-	if(!IniReadInt(L"Config",L"JieqiOrder",(DWORD*)&mode,ini_path)){
-		setJieqiMode(mode);
-	}
-	return mode;
-}
-
-void Ui_ConfigWnd::setJieqiMode(int m){
-	wchar_t currpath[128];
-	wchar_t ini_path[255];
-	int mode = 0;
-	if(File::GetCurrentPath(currpath)){
-		wsprintf(ini_path,L"%s\\m8calendar.ini",currpath);
-	}
-	if(!File::FileExists(ini_path)){
-		IniCreateFile(ini_path);
-	}
-	IniWriteInt(L"Config",L"JieqiOrder",m,ini_path);
-}

@@ -8,6 +8,8 @@ using namespace MzCommon;
 #include "resource.h"
 #include "ui_config.h"
 
+extern CalendarConfig AppConfig;
+
 MZ_IMPLEMENT_DYNAMIC(Ui_CalendarWnd)
 
 #define MZ_IDC_TOOLBAR_CALENDAR 101
@@ -24,16 +26,6 @@ MZ_IMPLEMENT_DYNAMIC(Ui_CalendarWnd)
 #define IDC_PPM_DATES 103
 #define IDC_PPM_HISTORY 104
 #define IDC_PPM_RETURN 105
-
-void UiImage::PaintWin(HDC hdcDst, RECT* prcWin, RECT* prcUpdate){
-	UiWin::PaintWin(hdcDst,prcWin,prcUpdate);
-//	if(_reqUpdate){
-//		_reqUpdate = false;
-		if(pimg){
-			pimg->Draw(hdcDst,prcWin,true,true);
-		}
-//	}
-}
 
 UiGrid::UiGrid()
 	:UiWin()
@@ -302,7 +294,7 @@ void UiGrid::PaintWin(HDC hdcDst, RECT* prcWin, RECT* prcUpdate){
 
 Ui_CalendarWnd::Ui_CalendarWnd(void)
 {
-	_showMonthByJieqi = Ui_ConfigWnd::getJieqiMode();
+	_showMonthByJieqi = AppConfig.IniJieqiOrder.Get();
 	_isMouseMoving = false;
 }
 
@@ -574,7 +566,7 @@ void Ui_CalendarWnd::OnMzCommand(WPARAM wParam, LPARAM lParam) {
 				dlg.SetAnimateType_Hide(MZ_ANIMTYPE_SCROLL_LEFT_TO_RIGHT_1);
 				int ret = dlg.DoModal();
 				if(ret == ID_OK){
-					_showMonthByJieqi = dlg.getJieqiMode();
+					_showMonthByJieqi = AppConfig.IniJieqiOrder.Get();
 					updateGrid();
 					updateInfo(true);
 					showTip();
