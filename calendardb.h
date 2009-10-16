@@ -16,19 +16,17 @@ using namespace std;
 #endif
 
 #define TABLE_HISTORY	L"HISTORY_v1"
-#define HISTORY_TBL_ITEM L"YEAR numeric not null,MONTH numeric not null,DAY numeric not null,TITLE text NOT NULL primary key,CONTENT text NOT NULL"
-#define HISTORY_TBL_INSERT L"(YEAR,MONTH,DAY,TITLE,CONTENT) values(%d,%d,%d,'%s',?)"
+#define HISTORY_TBL_ITEM L"YEAR numeric not null,MONTH_DAY numeric not null,TITLE text NOT NULL primary key,CONTENT text NOT NULL"
+#define HISTORY_TBL_INSERT L"(YEAR,MONTH_DAY,TITLE,CONTENT) values(%d,%d,'%s',?)"
 
 typedef struct CALENDAR_HISTORY {
     DWORD year;
-    DWORD month;
-    DWORD day;
+    DWORD month_day;
     wchar_t* title;
     wchar_t* content;
     CALENDAR_HISTORY(){
         year = 0;
-        month = 0;
-        day = 0;
+        month_day = 0;
         title = NULL;
         content = NULL;
     }
@@ -76,7 +74,7 @@ private:
 public:
 	bool HistoryExists(CALENDAR_HISTORY_ptr his);
 	int appendHistory(CALENDAR_HISTORY_ptr his);
-	bool getHistoryListByDate(int month = -1,int day = -1);
+	bool getHistoryListByDate(int month_day);
 	CALENDAR_HISTORY_ptr historyByIndex(int index);
 	bool getHistoryDetailByDate(CALENDAR_HISTORY_ptr his);
 public:
@@ -100,7 +98,8 @@ public:
 	}
 	bool indexDatabase(){
 		bool rc = false;
-		wsprintf(sqlcmdw,L"create index idx_history on \"%s\"(year,month,day,title)",TABLE_HISTORY);
+		wsprintf(sqlcmdw,L"create index idx_history on '"TABLE_HISTORY 
+            L"'(month_day,title)");
 		if (sqlite3_prepare16(db, sqlcmdw, -1, &pStmt, &pzTail) == SQLITE_OK) {
 			sqlite3_step(pStmt);
 		}

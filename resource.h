@@ -16,6 +16,7 @@
 #define IDB_PNG12                       113
 #define IDB_PNG13                       114
 #define IDB_PNG14                       115
+#define IDB_PNG15                       116
 
 // Next default values for new objects
 // 

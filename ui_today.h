@@ -37,6 +37,7 @@ public:
     UiStatic m_Ji;    //¼É
     UiImage m_Header;
     UiImage m_Spliter;
+    UiImage m_Spliter_h;
 private:
     void updateUi();
 protected:

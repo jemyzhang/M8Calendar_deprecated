@@ -76,8 +76,7 @@ bool clsCalendarDB::HistoryExists(CALENDAR_HISTORY_ptr his) {
 	bool nRet = true;
     int rc = 0;
     wsprintf(sqlcmdw, L"SELECT COUNT(*) FROM "TABLE_HISTORY
-		L" WHERE YEAR=%d AND MONTH=%d AND DAY=%d AND TITLE='%s'",
-		his->year,his->month,his->day,
+		L" WHERE TITLE='%s'",
 		his->title);
 	rc = sqlite3_prepare16(db,sqlcmdw,-1,&pStmt,&pzTail);
     if (!rc) {
@@ -96,7 +95,7 @@ int clsCalendarDB::appendHistory(CALENDAR_HISTORY_ptr his) {
 
     wsprintf(sqlcmdw, L"INSERT INTO "TABLE_HISTORY
         L" "HISTORY_TBL_INSERT,
-		his->year,his->month,his->day,
+		his->year,his->month_day,
 		his->title);
 	rc = sqlite3_prepare16(db,sqlcmdw,-1,&pStmt,&pzTail);
     if (rc == SQLITE_OK) {
@@ -175,11 +174,10 @@ bool clsCalendarDB::searchHistory(const wchar_t* sqlcmdw){
         while (sqlite3_step(pStmt) == SQLITE_ROW) {
             CALENDAR_HISTORY_ptr h = new CALENDAR_HISTORY_t;
             h->year = sqlite3_column_int(pStmt, 0);
-            h->month = sqlite3_column_int(pStmt, 1);
-            h->day = sqlite3_column_int(pStmt, 2);
+            h->month_day = sqlite3_column_int(pStmt, 1);
 
-			C::newstrcpy(&h->title,(LPWSTR) sqlite3_column_text16(pStmt, 3));
-			C::newstrcpy(&h->content,(LPWSTR) sqlite3_column_text16(pStmt, 4),30);
+			C::newstrcpy(&h->title,(LPWSTR) sqlite3_column_text16(pStmt, 2));
+			C::newstrcpy(&h->content,(LPWSTR) sqlite3_column_text16(pStmt, 3),30);
 
 			list_search_history.push_back(h);
         }
@@ -191,26 +189,21 @@ bool clsCalendarDB::searchHistory(const wchar_t* sqlcmdw){
 	return rc;
 }
 
-bool clsCalendarDB::getHistoryListByDate(int month,int day){
-	if(month == -1 && day == -1){
-		wsprintf(sqlcmdw,L"select * from %s",TABLE_HISTORY);
-	}else if(month != -1 && day == -1){
-		wsprintf(sqlcmdw,L"select * from %s where MONTH=%d",TABLE_HISTORY,month);
-	}else if(month != -1 && day != -1){
-		wsprintf(sqlcmdw,L"select * from %s where MONTH=%d and DAY=%d",TABLE_HISTORY,month,day);
-	}else{
-		return false;
-	}
+bool clsCalendarDB::getHistoryListByDate(int month_day){
+    wsprintf(sqlcmdw,L"select * from '"TABLE_HISTORY
+        L"' where MONTH_DAY=%d",
+        month_day);
 	return searchHistory(sqlcmdw);
 }
 
 bool clsCalendarDB::getHistoryDetailByDate(CALENDAR_HISTORY_ptr his){
     bool rc = true;
-	wsprintf(sqlcmdw,L"select * from %s where YEAR=%d and MONTH=%d and DAY=%d and TITLE=\"%s\"",TABLE_HISTORY,
-		his->year,his->month,his->day,his->title);
+	wsprintf(sqlcmdw,L"select CONTENT from '"TABLE_HISTORY
+        L"' where TITLE='%s'",
+		his->title);
     if (sqlite3_prepare16(db, sqlcmdw, -1, &pStmt, &pzTail) == SQLITE_OK) {
         if (sqlite3_step(pStmt) == SQLITE_ROW) {
-			C::newstrcpy(&his->content,(LPWSTR) sqlite3_column_text16(pStmt, 4));
+			C::newstrcpy(&his->content,(LPWSTR) sqlite3_column_text16(pStmt, 0));
         }
 	}else{
 		rc = false;

@@ -72,20 +72,16 @@ bool UI_HistoryWnd::getEntryData(LPTSTR linetext,bool bEnd){
                 wtitle[lstrlen(wtitle) - 1] = '\0'; //去除title后的回车符号'\r''\x13'
                 C::newstrcpy(&item.title,wtitle);
                 wchar_t *wDate = linetext + 2;//略过##
-                wchar_t *wMonth;
-                wchar_t *wDay;
+                wchar_t *wMonth_Day;
                 wchar_t *wYear;
                 nlen = lstrlen(wDate);
                 if(nlen < 7){ //日期长度不合法
                     newEntryTitle = false;
                     break;
                 }
-                wDay = wDate + nlen - 2;
-                item.day = _wtoi(wDay);
-                *wDay = '\0';
-                wMonth = wDate + nlen - 4;
-                item.month = _wtoi(wMonth);
-                *wMonth = '\0';
+                wMonth_Day = wDate + nlen - 4;
+                item.month_day = _wtoi(wMonth_Day);
+                *wMonth_Day = '\0';
                 wYear = wDate;
                 item.year = _wtoi(wYear);
                 break;
@@ -216,10 +212,10 @@ bool UI_HistoryWnd::ImportData(TCHAR* filename){
 //	m_Progressdlg.SetCurValue(90);
 //	m_Progressdlg.UpdateProgress();
 //	calendar_db.reorgDatebase();
-//	m_Progressdlg.SetInfo(L"创建索引...");
-//	m_Progressdlg.SetCurValue(90);
-//	m_Progressdlg.UpdateProgress();
-//	calendar_db.indexDatabase();
+	m_Progressdlg.SetInfo(L"创建索引...");
+	m_Progressdlg.SetCurValue(90);
+	m_Progressdlg.UpdateProgress();
+	calendar_db.indexDatabase();
 	m_Progressdlg.SetInfo(L"更新完成");
 	m_Progressdlg.SetCurValue(100);
 	m_Progressdlg.EndProgress();
@@ -336,7 +332,7 @@ void UI_HistoryWnd::setupDetailView(int idx){
 	CALENDAR_HISTORY_ptr ph = calendar_db.historyByIndex(idx);
 	CALENDAR_HISTORY_t hs;
 	hs.year = ph->year;
-	hs.month = ph->month; hs.day = ph->day;
+	hs.month_day = ph->month_day;
 	C::newstrcpy(&hs.title,ph->title);
 	hs.content = 0;
 	calendar_db.getHistoryDetailByDate(&hs);
@@ -373,7 +369,7 @@ void UI_HistoryWnd::GetHistoryList(){
 	wchar_t currpath[128];
 	
 	if(File::GetCurrentPath(currpath)){
-		wsprintf(db_path,L"%s\\calendar.db",currpath);
+		wsprintf(db_path,L"%s\\history.db",currpath);
 	}else{
 		wsprintf(db_path,DEFAULT_DB);
 	}
@@ -396,7 +392,7 @@ void UI_HistoryWnd::GetHistoryList(){
     MzBeginWaitDlg(m_hWnd);
     DateTime::waitms(0);
     
-    calendar_db.getHistoryListByDate(_month,_day);
+    calendar_db.getHistoryListByDate(_month*100 + _day);
 
 	m_ListHistory.RemoveAll();
 

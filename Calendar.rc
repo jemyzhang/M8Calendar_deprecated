@@ -66,6 +66,7 @@ IDB_PNG11               RCDATA                     "image\\戌狗.png"
 IDB_PNG12               RCDATA                     "image\\亥猪.png"
 IDB_PNG13               RCDATA                     "image\\header.png"
 IDB_PNG14               RCDATA                     "image\\spliter.png"
+IDB_PNG15               RCDATA                     "image\\spliter_h.png"
 #endif    // 中文(中华人民共和国) resources
 /////////////////////////////////////////////////////////////////////////////
 

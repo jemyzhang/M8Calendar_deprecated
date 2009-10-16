@@ -60,7 +60,7 @@ BOOL Ui_TodayWnd::OnInitDialog() {
     int backy = y;
     int width = GetWidth()*1/2;
 
-    m_Spliter.SetPos(width - 4,y,8,300);
+    m_Spliter.SetPos(width - 1,y,2,300);
     pimg = ImagingHelper::GetImageObject(MzGetInstanceHandle(), IDB_PNG14, true);
 	m_Spliter.setupImage(pimg);
 	AddUiWin(&m_Spliter);
@@ -123,6 +123,11 @@ BOOL Ui_TodayWnd::OnInitDialog() {
  	m_GanZhiMonth.SetTextSize(32);
     m_GanZhiMonth.SetDrawTextFormat(DT_CENTER|DT_VCENTER);
     AddUiWin(&m_GanZhiMonth);
+
+    m_Spliter_h.SetPos(0,y + 60,GetWidth(),2);
+    pimg = ImagingHelper::GetImageObject(MzGetInstanceHandle(), IDB_PNG15, true);
+	m_Spliter_h.setupImage(pimg);
+	AddUiWin(&m_Spliter_h);
 
 	y+= LINEHEIGHT + 30;
     width = GetWidth() - 40;
