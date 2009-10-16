@@ -25,6 +25,23 @@ typedef struct CALENDAR_HISTORY {
     DWORD day;
     wchar_t* title;
     wchar_t* content;
+    CALENDAR_HISTORY(){
+        year = 0;
+        month = 0;
+        day = 0;
+        title = NULL;
+        content = NULL;
+    }
+    ~CALENDAR_HISTORY(){
+        if(title){
+            delete [] title;
+            title = NULL;
+        }
+        if(content){
+            delete [] content;
+            content = NULL;
+        }
+    }
 } CALENDAR_HISTORY_t, *CALENDAR_HISTORY_ptr;
 
 class clsCalendarDB {

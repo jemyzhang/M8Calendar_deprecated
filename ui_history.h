@@ -48,5 +48,7 @@ private:
 	bool _detailViewMode;
 private:
     UINT identHistodayLine(LPTSTR linetext);    //分析行文字的类别 0: 无效 1: 标题 2: 内容
+    //bEnd: 最后一条，防止遗漏
+    bool getEntryData(LPTSTR linetext,bool bEnd = false); //如果写入获取到完整一条则返回1，否则0
 	bool ImportData(TCHAR* filename);
 };

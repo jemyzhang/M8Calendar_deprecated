@@ -29,6 +29,91 @@ UINT UI_HistoryWnd::identHistodayLine(LPTSTR linetext){
     if(linetext[0] == '#' && linetext[1] == '#') nRet = 1;  //标题
     return nRet;   //内容
 }
+
+bool UI_HistoryWnd::getEntryData(LPTSTR linetext,bool bEnd){
+    bool nRet = false;
+    static CALENDAR_HISTORY_t item;
+    static bool newEntryTitle = false;
+    static bool newEntryContent = false;
+    if(bEnd){
+        if(newEntryTitle){    //存在未保存的条目
+            //保存条目
+            if(newEntryContent){
+                newEntryContent = false;
+                calendar_db.appendHistory(&item);
+                delete [] item.content;
+                item.content = NULL;
+                nRet = true;
+            }
+        }
+        return nRet;
+    }
+    switch(identHistodayLine(linetext)){
+        case 1://标题
+            {
+                if(newEntryTitle){    //存在未保存的条目
+                    //保存条目
+                    if(newEntryContent){
+                        newEntryContent = false;
+                        calendar_db.appendHistory(&item);
+                        delete [] item.content;
+                        item.content = NULL;
+                        nRet = true;
+                    }
+                }
+                newEntryTitle = true;
+                int nlen = lstrlen(linetext);
+                wchar_t * wtitle = linetext;//略过日期和##和空格
+                while(*wtitle != ' ' && wtitle < linetext+nlen) wtitle++;
+                *wtitle = '\0'; //分割日期与标题
+                wtitle++;
+                wtitle[lstrlen(wtitle) - 1] = '\0'; //去除title后的回车符号'\r''\x13'
+                C::newstrcpy(&item.title,wtitle);
+                wchar_t *wDate = linetext + 2;//略过##
+                wchar_t *wMonth;
+                wchar_t *wDay;
+                wchar_t *wYear;
+                nlen = lstrlen(wDate);
+                if(nlen < 7){ //日期长度不合法
+                    newEntryTitle = false;
+                    break;
+                }
+                wDay = wDate + nlen - 2;
+                item.day = _wtoi(wDay);
+                *wDay = '\0';
+                wMonth = wDate + nlen - 4;
+                item.month = _wtoi(wMonth);
+                *wMonth = '\0';
+                wYear = wDate;
+                item.year = _wtoi(wYear);
+                break;
+            }
+        case 2://内容
+            newEntryContent = true;
+            if(item.content == NULL){
+                int wlen = lstrlen(linetext) + 2;
+                item.content = new wchar_t[wlen];
+                wcscpy_s(item.content,wlen,linetext);
+                item.content[wlen - 2] = '\n';
+                item.content[wlen - 1] = '\0';
+            }else{
+                wchar_t *strtmp = item.content;
+                int wlen = lstrlen(linetext) + 2 + lstrlen(strtmp);
+                item.content = new wchar_t[wlen];
+                wcscpy_s(item.content,wlen,strtmp);
+                wcscat_s(item.content,wlen,linetext);
+                item.content[wlen - 2] = '\n';
+                item.content[wlen - 1] = '\0';
+                delete [] strtmp;
+            }
+            break;
+        case 0://无效
+        default:
+            break;
+    }
+    return nRet;
+}
+
 bool UI_HistoryWnd::ImportData(TCHAR* filename){
 
 	if(!File::FileExists(filename)){
@@ -48,13 +133,8 @@ bool UI_HistoryWnd::ImportData(TCHAR* filename){
 	int nitems = 0;
 	unsigned int nbytes = 0;
 	calendar_db.beginTrans();
-
-    CALENDAR_HISTORY_t item;
-    item.title = 0;
-    item.content = 0;
-    bool newEntryTitle = false;
-    bool newEntryContent = false;
-
+    int nPercent = 0;
+    int _nPercent = 1;
 	if(enc == ttcAnsi){
         ifstream file;
         file.open(filename,  ios::in | ios::binary);
@@ -69,58 +149,19 @@ bool UI_HistoryWnd::ImportData(TCHAR* filename){
                     nbytes += strlen(sbuf);
                     wchar_t *wss;
                     File::chr2wch(sbuf,&wss);
-                    switch(identHistodayLine(wss)){
-                        case 1://标题
-                            {
-                            if(newEntryTitle){    //存在未保存的条目
-                                //保存条目
-                                if(newEntryContent){
-                                    newEntryContent = false;
-                                    calendar_db.appendHistory(&item);
-                                    delete [] item.content;
-                                    item.content = NULL;
-                                    nitems++;
-                                    wchar_t info[32];
-                                    wsprintf(info,L"读入记录中...%d",nitems);
-                                    m_Progressdlg.SetInfo(info);
-                                    m_Progressdlg.SetCurValue(80 * nbytes / nLen);
-                                    m_Progressdlg.UpdateProgress();
-                                }
-                                DateTime::waitms(1);
-                            }
-                            newEntryTitle = true;
-                            wchar_t * wtitle = wss + 8 + 2 + 1;   //略过日期和##和空格
-                            wtitle[lstrlen(wtitle) - 1] = '\0';
-                            C::newstrcpy(&item.title,wtitle);
-                            wchar_t *wdate = wss + 2;//略过##
-                            wdate[8] = '\0';    //删除日期后内容
-                            swscanf(wdate,L"%04d%02d%02d",&item.year,&item.month,&item.day);
-                            break;
-                            }
-                        case 2://内容
-                            newEntryContent = true;
-                            if(item.content == NULL){
-                                int wlen = lstrlen(wss) + 2;
-                                item.content = new wchar_t[wlen];
-                                wcscpy_s(item.content,wlen,wss);
-                                item.content[wlen - 2] = '\n';
-                                item.content[wlen - 1] = '\0';
-                            }else{
-                                wchar_t *strtmp = item.content;
-                                int wlen = lstrlen(wss) + 2 + lstrlen(strtmp);
-                                item.content = new wchar_t[wlen];
-                                wcscpy_s(item.content,wlen,strtmp);
-                                wcscat_s(item.content,wlen,wss);
-                                item.content[wlen - 2] = '\n';
-                                item.content[wlen - 1] = '\0';
-                                delete [] strtmp;
-                            }
-                            break;
-                        case 0://无效
-                        default:
-                            break;
+                    if(getEntryData(wss)){
+                        nitems++;
+                        nPercent = 100 * nbytes / nLen;
+                        if(nPercent != _nPercent){
+                            _nPercent = nPercent;
+                            wchar_t info[32];
+                            wsprintf(info,L"读入%d条记录...%d%%",nitems,nPercent);
+                            m_Progressdlg.SetInfo(info);
+                            m_Progressdlg.SetCurValue(80 * nbytes / nLen);
+                            m_Progressdlg.UpdateProgress();
+                            DateTime::waitms(1);
+                        }
                     }
-                    delete [] wss;
                 }else{
                     //错误发生
                 }
@@ -141,56 +182,14 @@ bool UI_HistoryWnd::ImportData(TCHAR* filename){
             while(!ofile.eof()){
                 if(ofile.getline(sbuf,nLen).good()){
                     nbytes += lstrlen(sbuf);
-                    switch(identHistodayLine(sbuf)){
-                        case 1://标题
-                            {
-                            if(newEntryTitle){    //存在未保存的条目
-                                //保存条目
-                                if(newEntryContent){
-                                    newEntryContent = false;
-                                    calendar_db.appendHistory(&item);
-                                    delete [] item.content;
-                                    item.content = NULL;
-                                    nitems++;
-                                    wchar_t info[32];
-                                    wsprintf(info,L"读入记录中...%d",nitems);
-                                    m_Progressdlg.SetInfo(info);
-                                    m_Progressdlg.SetCurValue(80 * nbytes / nLen);
-                                    m_Progressdlg.UpdateProgress();
-                                }
-                                DateTime::waitms(1);
-                            }
-                            newEntryTitle = true;
-                            wchar_t * wtitle = sbuf + 8 + 2 + 1;   //略过日期和##
-                            wtitle[lstrlen(wtitle) - 1] = '\0';//去除回车符
-                            C::newstrcpy(&item.title,wtitle);
-                            wchar_t *wdate = sbuf + 2;//略过##
-                            wdate[8] = '\0';    //删除日期后内容
-                            swscanf(wdate,L"%04d%02d%02d",&item.year,&item.month,&item.day);
-                            break;
-                            }
-                        case 2://内容
-                            newEntryContent = true;
-                            if(item.content == NULL){
-                                int wlen = lstrlen(sbuf) + 2;
-                                item.content = new wchar_t[wlen];
-                                wcscpy_s(item.content,wlen,sbuf);
-                                item.content[wlen - 2] = '\n';
-                                item.content[wlen - 1] = '\0';
-                            }else{
-                                wchar_t *strtmp = item.content;
-                                int wlen = lstrlen(sbuf) + 2 + lstrlen(strtmp);
-                                item.content = new wchar_t[wlen];
-                                wcscpy_s(item.content,wlen,strtmp);
-                                wcscat_s(item.content,wlen,sbuf);
-                                item.content[wlen - 2] = '\n';
-                                item.content[wlen - 1] = '\0';
-                                delete [] strtmp;
-                            }
-                            break;
-                        case 0://无效
-                        default:
-                            break;
+                    if(getEntryData(sbuf)){
+                        nitems++;
+                        wchar_t info[32];
+                        wsprintf(info,L"读入记录中...%d",nitems);
+                        m_Progressdlg.SetInfo(info);
+                        m_Progressdlg.SetCurValue(80 * nbytes / nLen);
+                        m_Progressdlg.UpdateProgress();
+                        DateTime::waitms(1);
                     }
                 }else{
                     //错误发生
@@ -200,6 +199,8 @@ bool UI_HistoryWnd::ImportData(TCHAR* filename){
 		}
         ofile.close();
 	}
+
+    getEntryData(0,true);   //最后一条记录
 
 	m_Progressdlg.SetInfo(L"写入数据中...");
 	m_Progressdlg.SetCurValue(85);
@@ -261,6 +262,7 @@ BOOL UI_HistoryWnd::OnInitDialog() {
 	m_EdtDetail.SetPos(0,y,GetWidth(),GetHeight() - y - MZM_HEIGHT_TEXT_TOOLBAR);
 	m_EdtDetail.SetReadOnly(true);
 	m_EdtDetail.SetInsideScroll(true);
+    m_EdtDetail.EnableScrollBarV(true);
 	m_EdtDetail.SetTextSize(20);
 	AddUiWin(&m_EdtDetail);
 	m_EdtDetail.SetVisible(false);

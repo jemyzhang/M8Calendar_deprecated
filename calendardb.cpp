@@ -159,8 +159,6 @@ void clsCalendarDB::clearHistorySearchResults(){
 		list<CALENDAR_HISTORY_ptr>::iterator i = list_search_history.begin();
 		for(;i != list_search_history.end();i++){
 			CALENDAR_HISTORY_ptr his = *i;
-			if(his->title) delete[] his->title;
-			if(his->content) delete[] his->content;
 			delete *i;
 		}
 		list_search_history.clear();
@@ -195,11 +193,11 @@ bool clsCalendarDB::searchHistory(const wchar_t* sqlcmdw){
 
 bool clsCalendarDB::getHistoryListByDate(int month,int day){
 	if(month == -1 && day == -1){
-		wsprintf(sqlcmdw,L"select * from %s order by YEAR DESC",TABLE_HISTORY);
+		wsprintf(sqlcmdw,L"select * from %s",TABLE_HISTORY);
 	}else if(month != -1 && day == -1){
-		wsprintf(sqlcmdw,L"select * from %s where MONTH=%d order by YEAR DESC",TABLE_HISTORY,month);
+		wsprintf(sqlcmdw,L"select * from %s where MONTH=%d",TABLE_HISTORY,month);
 	}else if(month != -1 && day != -1){
-		wsprintf(sqlcmdw,L"select * from %s where MONTH=%d and DAY=%d order by YEAR DESC",TABLE_HISTORY,month,day);
+		wsprintf(sqlcmdw,L"select * from %s where MONTH=%d and DAY=%d",TABLE_HISTORY,month,day);
 	}else{
 		return false;
 	}
