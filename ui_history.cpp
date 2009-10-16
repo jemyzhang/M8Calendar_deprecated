@@ -5,7 +5,9 @@ using namespace MzCommon;
 #include <fstream>
 
 #include "m8calendar.h"
+#include "ui_config.h"
 
+extern CalendarConfig AppConfig;
 MZ_IMPLEMENT_DYNAMIC(UI_HistoryWnd)
 
 #define MZ_IDC_TOOLBAR_ABOUT 101
@@ -263,7 +265,7 @@ BOOL UI_HistoryWnd::OnInitDialog() {
 	m_EdtDetail.SetReadOnly(true);
 	m_EdtDetail.SetInsideScroll(true);
     m_EdtDetail.EnableScrollBarV(true);
-	m_EdtDetail.SetTextSize(20);
+    m_EdtDetail.SetTextSize(20 + 5 * AppConfig.IniHistodayFontSize.Get());
 	AddUiWin(&m_EdtDetail);
 	m_EdtDetail.SetVisible(false);
 

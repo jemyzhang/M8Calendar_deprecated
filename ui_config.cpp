@@ -1,5 +1,7 @@
 #include "ui_config.h"
 #include "..\MzCommon\MzCommon.h"
+#include "..\MzCommon\UiSingleOption.h"
+
 using namespace MzCommon;
 
 #define MZ_IDC_TOOLBAR_MAIN 101
@@ -7,6 +9,7 @@ using namespace MzCommon;
 
 #define MZ_IDC_BUTTON_JIEQI_MODE 103
 #define MZ_IDC_LIST_CONFIG 104
+#define MZ_IDC_BUTTON_FONT_SIZE 105
 
 CalendarConfig AppConfig;
 
@@ -17,8 +20,13 @@ const wchar_t* JIEQIMODESTR[] = {
 	L"以节气交界日为起点",
 };
 
+const wchar_t* FONTSIZESTR[] = {
+	L"小字体",
+	L"中字体",
+	L"大字体",
+};
+
 Ui_ConfigWnd::Ui_ConfigWnd(){
-	_viewMode = 0;
 }
 
 BOOL Ui_ConfigWnd::OnInitDialog() {
@@ -44,20 +52,16 @@ BOOL Ui_ConfigWnd::OnInitDialog() {
     m_BtnJieqi.SetShowImage2(true);
     AddUiWin(&m_BtnJieqi);
 
-	y+=MZM_HEIGHT_BUTTONEX;
-    m_ScrollWin.SetPos(0, y, GetWidth(), GetHeight() - MZM_HEIGHT_TEXT_TOOLBAR);
-    m_ScrollWin.SetID(MZ_IDC_SCROLLWIN);
-    m_ScrollWin.EnableScrollBarV(true);
-    AddUiWin(&m_ScrollWin);
-
-	m_DetailList.SetPos(0, 0, GetWidth(), GetHeight() - MZM_HEIGHT_TEXT_TOOLBAR);
-    m_DetailList.SetID(MZ_IDC_LIST_CONFIG);
-	m_DetailList.SetItemHeight(50);
-	m_DetailList.SetTextSize(m_DetailList.GetTextSize() - 4);
-	m_DetailList.SetDrawTextFormat(DT_LEFT|DT_SINGLELINE|DT_VCENTER);
-	m_DetailList.EnableScrollBarV(true);
-	m_DetailList.EnableNotifyMessage(true);
-	m_ScrollWin.AddChild(&m_DetailList);
+	y += MZM_HEIGHT_BUTTONEX;
+    m_BtnFontSize.SetPos(0, y, GetWidth(), MZM_HEIGHT_BUTTONEX);
+    m_BtnFontSize.SetText(L"历史上的今天字体大小");
+    m_BtnFontSize.SetTextMaxLen(0);
+    m_BtnFontSize.SetButtonType(MZC_BUTTON_LINE_BOTTOM);
+    m_BtnFontSize.SetID(MZ_IDC_BUTTON_FONT_SIZE);
+    m_BtnFontSize.SetImage2(imgArrow);
+    m_BtnFontSize.SetImageWidth2(imgArrow->GetImageWidth());
+    m_BtnFontSize.SetShowImage2(true);
+    AddUiWin(&m_BtnFontSize);
 
 	m_Toolbar.SetPos(0, GetHeight() - MZM_HEIGHT_TEXT_TOOLBAR, GetWidth(), MZM_HEIGHT_TEXT_TOOLBAR);
 	m_Toolbar.SetButton(0, true, true, L"返回");
@@ -71,71 +75,24 @@ BOOL Ui_ConfigWnd::OnInitDialog() {
 }
 
 void Ui_ConfigWnd::updateUi(){
-    int _JieqiOrder = AppConfig.IniJieqiOrder.Get();
-	m_BtnJieqi.SetText2(JIEQIMODESTR[_JieqiOrder]);
+	m_BtnJieqi.SetText2(JIEQIMODESTR[AppConfig.IniJieqiOrder.Get()]);
 	m_BtnJieqi.Invalidate();
 	m_BtnJieqi.Update();
 
-	if(_viewMode == 0){
-		m_ScrollWin.SetVisible(false);
-	}
-	if(_viewMode == 1){
-	    ListItem li;
-		CMzString str;
-		m_DetailList.RemoveAll();
-		for(int i = 0; i < 2; i++){
-			str = JIEQIMODESTR[i];
-			li.Text = str;
-			m_DetailList.AddItem(li);
-		}
-		m_ScrollWin.SetPos(0, MZM_HEIGHT_BUTTONEX + MZM_HEIGHT_CAPTION, GetWidth(), GetHeight() - MZM_HEIGHT_TEXT_TOOLBAR);
-        m_DetailList.SetSelectedIndex(_JieqiOrder);
-		m_ScrollWin.SetVisible(true);
-	}
-	Invalidate();
-	UpdateWindow();
-}
+    m_BtnFontSize.SetText2(FONTSIZESTR[AppConfig.IniHistodayFontSize.Get()]);
+	m_BtnFontSize.Invalidate();
+	m_BtnFontSize.Update();
 
-LRESULT Ui_ConfigWnd::MzDefWndProc(UINT message, WPARAM wParam, LPARAM lParam) {
-    switch (message) {
-        case MZ_WM_MOUSE_NOTIFY:
-        {
-            int nID = LOWORD(wParam);
-            int nNotify = HIWORD(wParam);
-            int x = LOWORD(lParam);
-            int y = HIWORD(lParam);
-            if (nID == MZ_IDC_LIST_CONFIG && nNotify == MZ_MN_LBUTTONDOWN) {
-                if (!m_DetailList.IsMouseDownAtScrolling() && !m_DetailList.IsMouseMoved()) {
-                    int nIndex = m_DetailList.CalcIndexOfPos(x, y);
-					if(nIndex != -1){
-						if(_viewMode == 1){
-							if(nIndex < 2){
-								AppConfig.IniJieqiOrder.Set(nIndex);
-							}
-						}
-						_viewMode = 0;
-						updateUi();
-					}
-                }
-                return 0;
-            }
-            if (nID == MZ_IDC_LIST_CONFIG && nNotify == MZ_MN_MOUSEMOVE) {
-                m_DetailList.SetSelectedIndex(-1);
-                m_DetailList.Invalidate();
-                m_DetailList.Update();
-                return 0;
-            }
-        }
-    }
-    return CMzWndEx::MzDefWndProc(message, wParam, lParam);
 }
 
 void Ui_ConfigWnd::OnMzCommand(WPARAM wParam, LPARAM lParam) {
     UINT_PTR id = LOWORD(wParam);
     switch (id) {
 		case MZ_IDC_BUTTON_JIEQI_MODE:
-			_viewMode = (_viewMode == 1) ? 0 : 1;
-			updateUi();
+            ShowJieqiOptionDlg();
+			break;
+		case MZ_IDC_BUTTON_FONT_SIZE:
+            ShowFontSizeOptionDlg();
 			break;
         case MZ_IDC_TOOLBAR_MAIN:
         {
@@ -150,3 +107,43 @@ void Ui_ConfigWnd::OnMzCommand(WPARAM wParam, LPARAM lParam) {
     }
 }
 
+void Ui_ConfigWnd::ShowJieqiOptionDlg(){
+    Ui_SingleOptionWnd dlg;
+    for(int i = 0; i < sizeof(JIEQIMODESTR)/sizeof(JIEQIMODESTR[0]); i++){
+        dlg.AppendOptionItem(const_cast<LPTSTR>(JIEQIMODESTR[i]));
+    }
+    dlg.SetSelectedIndex(AppConfig.IniJieqiOrder.Get());
+    dlg.SetTitleText(L"设定干支纪月方式");
+    RECT rcWork = MzGetWorkArea();
+    dlg.Create(rcWork.left + 40, rcWork.top + 120, RECT_WIDTH(rcWork) - 80, RECT_HEIGHT(rcWork) - 240,
+        m_hWnd, 0, WS_POPUP);
+    // set the animation of the window
+    dlg.SetAnimateType_Show(MZ_ANIMTYPE_NONE);
+    dlg.SetAnimateType_Hide(MZ_ANIMTYPE_FADE);
+    int nRet = dlg.DoModal();
+    if(nRet == ID_OK){
+        AppConfig.IniJieqiOrder.Set(dlg.GetSelectedIndex());
+        updateUi();
+    }
+}
+
+//历史上的今天文字大小
+void Ui_ConfigWnd::ShowFontSizeOptionDlg(){
+    Ui_SingleOptionWnd dlg;
+    for(int i = 0; i < sizeof(FONTSIZESTR)/sizeof(FONTSIZESTR[0]); i++){
+        dlg.AppendOptionItem(const_cast<LPTSTR>(FONTSIZESTR[i]));
+    }
+    dlg.SetSelectedIndex(AppConfig.IniHistodayFontSize.Get());
+    dlg.SetTitleText(L"设定浏览文字大小");
+    RECT rcWork = MzGetWorkArea();
+    dlg.Create(rcWork.left + 40, rcWork.top + 120, RECT_WIDTH(rcWork) - 80, RECT_HEIGHT(rcWork) - 240,
+        m_hWnd, 0, WS_POPUP);
+    // set the animation of the window
+    dlg.SetAnimateType_Show(MZ_ANIMTYPE_NONE);
+    dlg.SetAnimateType_Hide(MZ_ANIMTYPE_FADE);
+    int nRet = dlg.DoModal();
+    if(nRet == ID_OK){
+        AppConfig.IniHistodayFontSize.Set(dlg.GetSelectedIndex());
+        updateUi();
+    }
+}

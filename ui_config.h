@@ -15,9 +15,11 @@ public:
 protected:
 	void InitIniKey(){
 		IniJieqiOrder.InitKey(L"Config",L"JieqiOrder",0);
+        IniHistodayFontSize.InitKey(L"Config",L"HisFontSize",0);
 	}
 public:
 	MzConfig IniJieqiOrder;//1: 以节气交界日为起点 0: 以农历初一为起点
+    MzConfig IniHistodayFontSize;   //0:小 1: 中 2: 大
 };
 
 class Ui_ConfigWnd : public CMzWndEx {
@@ -26,23 +28,20 @@ public:
 	Ui_ConfigWnd();
 	void updateUi();
 public:
-    UiScrollWin m_ScrollWin;
     UiToolbar_Text m_Toolbar;
 	UiCaption m_lblTitle;
     UiButtonEx m_BtnJieqi;	//节气排列方式
-	UiList	m_DetailList;	//配置列表
+    UiButtonEx m_BtnFontSize;	//浏览字体大小
 
 protected:
     // Initialization of the window (dialog)
     virtual BOOL OnInitDialog();
 
-    // override the MZFC window messages handler
-    LRESULT MzDefWndProc(UINT message, WPARAM wParam, LPARAM lParam);
-
     // override the MZFC command handler
     virtual void OnMzCommand(WPARAM wParam, LPARAM lParam);
 private:
-	int _viewMode;
+    void ShowJieqiOptionDlg();
+    void ShowFontSizeOptionDlg();
 };
 
 
