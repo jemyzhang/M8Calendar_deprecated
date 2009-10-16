@@ -10,6 +10,7 @@ using namespace MzCommon;
 #define MZ_IDC_BUTTON_JIEQI_MODE 103
 #define MZ_IDC_LIST_CONFIG 104
 #define MZ_IDC_BUTTON_FONT_SIZE 105
+#define MZ_IDC_BUTTON_STARTUP   106
 
 CalendarConfig AppConfig;
 
@@ -24,6 +25,11 @@ const wchar_t* FONTSIZESTR[] = {
 	L"小字体",
 	L"中字体",
 	L"大字体",
+};
+
+const wchar_t* StartupPageStr[] = {
+	L"月历界面",
+	L"今日界面",
 };
 
 Ui_ConfigWnd::Ui_ConfigWnd(){
@@ -43,6 +49,17 @@ BOOL Ui_ConfigWnd::OnInitDialog() {
     AddUiWin(&m_lblTitle);
 
 	y += MZM_HEIGHT_CAPTION;
+    m_BtnStartupPage.SetPos(0, y, GetWidth(), MZM_HEIGHT_BUTTONEX);
+    m_BtnStartupPage.SetText(L"程序启动界面");
+    m_BtnStartupPage.SetTextMaxLen(0);
+    m_BtnStartupPage.SetButtonType(MZC_BUTTON_LINE_BOTTOM);
+    m_BtnStartupPage.SetID(MZ_IDC_BUTTON_STARTUP);
+    m_BtnStartupPage.SetImage2(imgArrow);
+    m_BtnStartupPage.SetImageWidth2(imgArrow->GetImageWidth());
+    m_BtnStartupPage.SetShowImage2(true);
+    AddUiWin(&m_BtnStartupPage);
+
+    y += MZM_HEIGHT_BUTTONEX;
     m_BtnJieqi.SetPos(0, y, GetWidth(), MZM_HEIGHT_BUTTONEX);
     m_BtnJieqi.SetText(L"干支纪月");
     m_BtnJieqi.SetButtonType(MZC_BUTTON_LINE_BOTTOM);
@@ -83,6 +100,10 @@ void Ui_ConfigWnd::updateUi(){
 	m_BtnFontSize.Invalidate();
 	m_BtnFontSize.Update();
 
+    m_BtnStartupPage.SetText2(StartupPageStr[AppConfig.IniStartupPage.Get()]);
+	m_BtnStartupPage.Invalidate();
+	m_BtnStartupPage.Update();
+
 }
 
 void Ui_ConfigWnd::OnMzCommand(WPARAM wParam, LPARAM lParam) {
@@ -94,6 +115,9 @@ void Ui_ConfigWnd::OnMzCommand(WPARAM wParam, LPARAM lParam) {
 		case MZ_IDC_BUTTON_FONT_SIZE:
             ShowFontSizeOptionDlg();
 			break;
+        case MZ_IDC_BUTTON_STARTUP:
+            ShowStartupOptionDlg();
+            break;
         case MZ_IDC_TOOLBAR_MAIN:
         {
             int nIndex = lParam;
@@ -144,6 +168,27 @@ void Ui_ConfigWnd::ShowFontSizeOptionDlg(){
     int nRet = dlg.DoModal();
     if(nRet == ID_OK){
         AppConfig.IniHistodayFontSize.Set(dlg.GetSelectedIndex());
+        updateUi();
+    }
+}
+
+//启动界面
+void Ui_ConfigWnd::ShowStartupOptionDlg(){
+    Ui_SingleOptionWnd dlg;
+    for(int i = 0; i < sizeof(StartupPageStr)/sizeof(StartupPageStr[0]); i++){
+        dlg.AppendOptionItem(const_cast<LPTSTR>(StartupPageStr[i]));
+    }
+    dlg.SetSelectedIndex(AppConfig.IniStartupPage.Get());
+    dlg.SetTitleText(L"设定启动界面");
+    RECT rcWork = MzGetWorkArea();
+    dlg.Create(rcWork.left + 40, rcWork.top + 120, RECT_WIDTH(rcWork) - 80, RECT_HEIGHT(rcWork) - 240,
+        m_hWnd, 0, WS_POPUP);
+    // set the animation of the window
+    dlg.SetAnimateType_Show(MZ_ANIMTYPE_NONE);
+    dlg.SetAnimateType_Hide(MZ_ANIMTYPE_FADE);
+    int nRet = dlg.DoModal();
+    if(nRet == ID_OK){
+        AppConfig.IniStartupPage.Set(dlg.GetSelectedIndex());
         updateUi();
     }
 }

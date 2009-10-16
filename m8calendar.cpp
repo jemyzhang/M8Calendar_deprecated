@@ -3,11 +3,15 @@
 //#include "ui_reminder.h"
 //#include "ui_password.h"
 //#include <MotorVibrate.h>
+#include "ui_config.h"
+#include "ui_today.h"
 
 using namespace MzCommon;
 // The global variable of the application.
 M8CashApp theApp;
 //CashReminder calendar_reminder;
+
+extern CalendarConfig AppConfig;
 
 BOOL M8CashApp::Init() {
     // Init the COM relative library.
@@ -62,6 +66,17 @@ BOOL M8CashApp::Init() {
 	// Create the main window
 	RECT rcWork = MzGetWorkArea();
 	m_MainWnd.Create(rcWork.left, rcWork.top, RECT_WIDTH(rcWork), RECT_HEIGHT(rcWork), 0, 0, 0);
+
+    if(AppConfig.IniStartupPage.Get() != 0){
+        Ui_TodayWnd dlg;
+        RECT rcWork = MzGetWorkArea();
+        dlg.Create(rcWork.left, rcWork.top, RECT_WIDTH(rcWork), RECT_HEIGHT(rcWork),
+            m_MainWnd.m_hWnd, 0, WS_POPUP);
+        // set the animation of the window
+        dlg.SetAnimateType_Show(MZ_ANIMTYPE_ZOOM_IN);
+        dlg.SetAnimateType_Hide(MZ_ANIMTYPE_NONE);
+        dlg.DoModal();
+    }
 	m_MainWnd.Show();
 
     // return TRUE means init success.

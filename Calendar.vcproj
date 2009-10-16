@@ -237,6 +237,10 @@
 				RelativePath=".\ui_history.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\ui_today.cpp"
+				>
+			</File>
 			<Filter
 				Name="MzCommon"
 				>
@@ -297,6 +301,10 @@
 			</File>
 			<File
 				RelativePath=".\ui_history.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ui_today.h"
 				>
 			</File>
 			<Filter

@@ -7,6 +7,7 @@ using namespace MzCommon;
 #include "ui_history.h"
 #include "resource.h"
 #include "ui_config.h"
+#include "ui_today.h"
 
 extern CalendarConfig AppConfig;
 
@@ -427,10 +428,21 @@ void Ui_CalendarWnd::OnMzCommand(WPARAM wParam, LPARAM lParam) {
         {
             int nIndex = lParam;
 			if(nIndex == 0){	//今日
+#if 0
 				DateTime::getDate(&_year,&_month,&_day);
 				updateGrid();
 				updateInfo();
 				showTip();
+#else
+                Ui_TodayWnd dlg;
+                RECT rcWork = MzGetWorkArea();
+                dlg.Create(rcWork.left, rcWork.top, RECT_WIDTH(rcWork), RECT_HEIGHT(rcWork),
+                    m_hWnd, 0, WS_POPUP);
+                // set the animation of the window
+                dlg.SetAnimateType_Show(MZ_ANIMTYPE_ZOOM_IN);
+                dlg.SetAnimateType_Hide(MZ_ANIMTYPE_FADE);
+                dlg.DoModal();
+#endif
 				return;
 			}
 			if(nIndex == 1){	//更多

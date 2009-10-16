@@ -16,10 +16,12 @@ protected:
 	void InitIniKey(){
 		IniJieqiOrder.InitKey(L"Config",L"JieqiOrder",0);
         IniHistodayFontSize.InitKey(L"Config",L"HisFontSize",0);
+        IniStartupPage.InitKey(L"Config",L"StartupPage",0);
 	}
 public:
 	MzConfig IniJieqiOrder;//1: 以节气交界日为起点 0: 以农历初一为起点
     MzConfig IniHistodayFontSize;   //0:小 1: 中 2: 大
+    MzConfig IniStartupPage;    //0: Month 1: Today
 };
 
 class Ui_ConfigWnd : public CMzWndEx {
@@ -30,6 +32,7 @@ public:
 public:
     UiToolbar_Text m_Toolbar;
 	UiCaption m_lblTitle;
+    UiButtonEx m_BtnStartupPage;	//启动界面
     UiButtonEx m_BtnJieqi;	//节气排列方式
     UiButtonEx m_BtnFontSize;	//浏览字体大小
 
@@ -42,6 +45,7 @@ protected:
 private:
     void ShowJieqiOptionDlg();
     void ShowFontSizeOptionDlg();
+    void ShowStartupOptionDlg();
 };
 
 
