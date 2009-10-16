@@ -537,14 +537,13 @@ void Ui_CalendarWnd::OnMzCommand(WPARAM wParam, LPARAM lParam) {
 				{
 					UI_HistoryWnd dlg;
 					RECT rcWork = MzGetWorkArea();
-					dlg.Create(rcWork.left, rcWork.top, RECT_WIDTH(rcWork), RECT_HEIGHT(rcWork),
+					dlg.setupdate(_month,_day);
+
+                    dlg.Create(rcWork.left, rcWork.top, RECT_WIDTH(rcWork), RECT_HEIGHT(rcWork),
 							m_hWnd, 0, WS_POPUP);
 					// set the animation of the window
 					dlg.SetAnimateType_Show(MZ_ANIMTYPE_SCROLL_RIGHT_TO_LEFT_2);
 					dlg.SetAnimateType_Hide(MZ_ANIMTYPE_SCROLL_LEFT_TO_RIGHT_1);
-					MzBeginWaitDlg(m_hWnd);
-					dlg.setupdate(_month,_day);
-					MzEndWaitDlg();
 					dlg.DoModal();
 					break;
 				}

@@ -121,7 +121,11 @@ bool UI_HistoryWnd::ImportData(TCHAR* filename){
 	if(!File::FileExists(filename)){
 		return false;
 	}
-
+    if(::MzMessageBoxEx(m_hWnd,L"发现可更新的数据源，是否现在更新？",L"更新",MZ_YESNO) != 1){
+        DateTime::waitms(0);
+        return true;
+    }
+    DateTime::waitms(0);
 	MzProgressDialog m_Progressdlg;
 	m_Progressdlg.SetShowTitle(true);
 	m_Progressdlg.SetShowInfo(true);
@@ -269,7 +273,19 @@ BOOL UI_HistoryWnd::OnInitDialog() {
 	AddUiWin(&m_EdtDetail);
 	m_EdtDetail.SetVisible(false);
 
+    SetTimer(m_hWnd,0x1001,100,NULL);
+
 	return TRUE;
+}
+
+void UI_HistoryWnd::OnTimer(UINT nIDEvent){
+	static int cnt = 0;
+	switch(nIDEvent){
+		case 0x1001:
+            KillTimer(m_hWnd,0x1001);
+            GetHistoryList();
+			break;
+	}
 }
 
 void UI_HistoryWnd::OnMzCommand(WPARAM wParam, LPARAM lParam) {
@@ -348,6 +364,11 @@ void UI_HistoryWnd::setupdate(DWORD month,DWORD day){
 		month = m;
 		day = d;
 	}
+	_month = month;
+	_day = day;
+}
+
+void UI_HistoryWnd::GetHistoryList(){
 
 	wchar_t currpath[128];
 	
@@ -357,20 +378,13 @@ void UI_HistoryWnd::setupdate(DWORD month,DWORD day){
 		wsprintf(db_path,DEFAULT_DB);
 	}
 	if(calendar_db.connect(db_path)){
-		//popup password dialog
-		//try if there is a password
-		//calendar_db.decrypt(L"PASSWORD",8);
-		//检查记录版本
 		calendar_db.recover();
 		if(!calendar_db.checkDatabaseVersion()){
 			_isConnected = false;
-			return;
 		}
-		//calendar_db.encrypt(0,0);
 	}else{
 		//检查记录版本
 		calendar_db.recover();
-		//calendar_db.encrypt(L"PASSWORD",8);
 	}
 	//导入记录
 	wchar_t db_txt[256];
@@ -379,8 +393,10 @@ void UI_HistoryWnd::setupdate(DWORD month,DWORD day){
 		wsprintf(db_txt,L"%s\\histoday.dat",currpath);
 		ImportData(db_txt);
 	}
-
-	calendar_db.getHistoryListByDate(month,day);
+    MzBeginWaitDlg(m_hWnd);
+    DateTime::waitms(0);
+    
+    calendar_db.getHistoryListByDate(_month,_day);
 
 	m_ListHistory.RemoveAll();
 
@@ -394,8 +410,7 @@ void UI_HistoryWnd::setupdate(DWORD month,DWORD day){
 	m_ListHistory.setupdb(&calendar_db);
 	m_ListHistory.Invalidate();
 	m_ListHistory.Update();
-	_month = month;
-	_day = day;
+    MzEndWaitDlg();
 }
 
 void UiHistoryList::DrawItem(HDC hdcDst, int nIndex, RECT* prcItem, RECT *prcWin, RECT *prcUpdate){

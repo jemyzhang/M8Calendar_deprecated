@@ -23,7 +23,9 @@ class UI_HistoryWnd : public CMzWndEx {
 public:
 	UI_HistoryWnd();
 	void setupdate(DWORD month = -1,DWORD day = -1);
+    void OnTimer(UINT nIDEvent);
 protected:
+    void GetHistoryList();
 	void setupDetailView(int);
 protected:
     UiToolbar_Text m_Toolbar;
