@@ -190,8 +190,8 @@ bool clsCalendarDB::searchHistory(const wchar_t* sqlcmdw){
 }
 
 bool clsCalendarDB::getHistoryListByDate(int month_day){
-    wsprintf(sqlcmdw,L"select * from '"TABLE_HISTORY
-        L"' where MONTH_DAY=%d",
+    wsprintf(sqlcmdw,L"SELECT * FROM '"TABLE_HISTORY
+        L"' WHERE MONTH_DAY=%d ORDER BY YEAR DESC",
         month_day);
 	return searchHistory(sqlcmdw);
 }

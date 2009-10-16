@@ -374,13 +374,16 @@ void UI_HistoryWnd::GetHistoryList(){
 		wsprintf(db_path,DEFAULT_DB);
 	}
 	if(calendar_db.connect(db_path)){
+        calendar_db.decrypt(L"PASSWORD",8);
 		calendar_db.recover();
 		if(!calendar_db.checkDatabaseVersion()){
 			_isConnected = false;
 		}
+        //calendar_db.encrypt(L"PASSWORD",8);
 	}else{
 		//检查记录版本
 		calendar_db.recover();
+        calendar_db.encrypt(L"PASSWORD",8);
 	}
 	//导入记录
 	wchar_t db_txt[256];
@@ -389,9 +392,7 @@ void UI_HistoryWnd::GetHistoryList(){
 		wsprintf(db_txt,L"%s\\histoday.dat",currpath);
 		ImportData(db_txt);
 	}
-    MzBeginWaitDlg(m_hWnd);
-    DateTime::waitms(0);
-    
+   
     calendar_db.getHistoryListByDate(_month*100 + _day);
 
 	m_ListHistory.RemoveAll();
@@ -406,7 +407,6 @@ void UI_HistoryWnd::GetHistoryList(){
 	m_ListHistory.setupdb(&calendar_db);
 	m_ListHistory.Invalidate();
 	m_ListHistory.Update();
-    MzEndWaitDlg();
 }
 
 void UiHistoryList::DrawItem(HDC hdcDst, int nIndex, RECT* prcItem, RECT *prcWin, RECT *prcUpdate){

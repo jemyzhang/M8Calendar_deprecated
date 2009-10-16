@@ -428,12 +428,10 @@ void Ui_CalendarWnd::OnMzCommand(WPARAM wParam, LPARAM lParam) {
         {
             int nIndex = lParam;
 			if(nIndex == 0){	//今日
-#if 0
 				DateTime::getDate(&_year,&_month,&_day);
 				updateGrid();
 				updateInfo();
 				showTip();
-#else
                 Ui_TodayWnd dlg;
                 RECT rcWork = MzGetWorkArea();
                 dlg.Create(rcWork.left, rcWork.top, RECT_WIDTH(rcWork), RECT_HEIGHT(rcWork),
@@ -442,7 +440,6 @@ void Ui_CalendarWnd::OnMzCommand(WPARAM wParam, LPARAM lParam) {
                 dlg.SetAnimateType_Show(MZ_ANIMTYPE_ZOOM_IN);
                 dlg.SetAnimateType_Hide(MZ_ANIMTYPE_FADE);
                 dlg.DoModal();
-#endif
 				return;
 			}
 			if(nIndex == 1){	//更多
