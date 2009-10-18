@@ -1,6 +1,8 @@
 #include "ui_today.h"
 #include "..\MzCommon\MzCommon.h"
 using namespace MzCommon;
+#include "ui_calendar.h"
+#include "ui_config.h"
 
 #include "resource.h"
 
@@ -8,6 +10,7 @@ MZ_IMPLEMENT_DYNAMIC(Ui_TodayWnd)
 
 #define MZ_IDC_TOOLBAR_CALENDAR 101
 //////
+extern CalendarConfig AppConfig;
 
 const wchar_t* WeekDayNameCN[] = {
     L"星期一",
@@ -146,7 +149,11 @@ BOOL Ui_TodayWnd::OnInitDialog() {
 
     m_Toolbar.SetPos(0, GetHeight() - MZM_HEIGHT_TEXT_TOOLBAR, GetWidth(), MZM_HEIGHT_TEXT_TOOLBAR);
     m_Toolbar.SetButton(0, true, true, L"前一天");
-    m_Toolbar.SetButton(1, true, true, L"返回月历");
+    if(AppConfig.IniStartupPage.Get() == 0){
+        m_Toolbar.SetButton(1, true, true, L"返回月历");
+    }else{
+        m_Toolbar.SetButton(1, true, true, L"显示月历");
+    }
     m_Toolbar.SetButton(2, true, true, L"后一天");
     m_Toolbar.SetID(MZ_IDC_TOOLBAR_CALENDAR);
     AddUiWin(&m_Toolbar);
@@ -253,7 +260,18 @@ void Ui_TodayWnd::OnMzCommand(WPARAM wParam, LPARAM lParam) {
 				return;
 			}
 			if(nIndex == 1){	//返回月历
-                EndModal(ID_OK);
+                if(AppConfig.IniStartupPage.Get() != 0){
+                    Ui_CalendarWnd dlg;
+                    RECT rcWork = MzGetWorkArea();
+                    dlg.Create(rcWork.left, rcWork.top, RECT_WIDTH(rcWork), RECT_HEIGHT(rcWork),
+                        m_hWnd, 0, WS_POPUP);
+                    // set the animation of the window
+                    dlg.SetAnimateType_Show(MZ_ANIMTYPE_ZOOM_IN);
+                    dlg.SetAnimateType_Hide(MZ_ANIMTYPE_FADE);
+                    dlg.DoModal();
+                }else{
+                    EndModal(ID_OK);
+                }
 				return;
 			}
 			if(nIndex == 2){	//后一天

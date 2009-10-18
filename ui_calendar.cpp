@@ -296,6 +296,7 @@ void UiGrid::PaintWin(HDC hdcDst, RECT* prcWin, RECT* prcUpdate){
 Ui_CalendarWnd::Ui_CalendarWnd(void)
 {
 	_isMouseMoving = false;
+    _year = _month = _day = 0;
 }
 
 Ui_CalendarWnd::~Ui_CalendarWnd(void)
@@ -366,7 +367,7 @@ BOOL Ui_CalendarWnd::OnInitDialog() {
 
 	DateTime::getDate(&_year,&_month,&_day);
 	updateGrid();
-	updateInfo();
+	updateInfo(true);
     return TRUE;
 }
 
@@ -428,18 +429,22 @@ void Ui_CalendarWnd::OnMzCommand(WPARAM wParam, LPARAM lParam) {
         {
             int nIndex = lParam;
 			if(nIndex == 0){	//今日
-				DateTime::getDate(&_year,&_month,&_day);
-				updateGrid();
-				updateInfo();
-				showTip();
-                Ui_TodayWnd dlg;
-                RECT rcWork = MzGetWorkArea();
-                dlg.Create(rcWork.left, rcWork.top, RECT_WIDTH(rcWork), RECT_HEIGHT(rcWork),
-                    m_hWnd, 0, WS_POPUP);
-                // set the animation of the window
-                dlg.SetAnimateType_Show(MZ_ANIMTYPE_ZOOM_IN);
-                dlg.SetAnimateType_Hide(MZ_ANIMTYPE_FADE);
-                dlg.DoModal();
+                if(AppConfig.IniStartupPage.Get() == 0){
+                    DateTime::getDate(&_year,&_month,&_day);
+                    updateGrid();
+                    updateInfo();
+                    showTip();
+                    Ui_TodayWnd dlg;
+                    RECT rcWork = MzGetWorkArea();
+                    dlg.Create(rcWork.left, rcWork.top, RECT_WIDTH(rcWork), RECT_HEIGHT(rcWork),
+                        m_hWnd, 0, WS_POPUP);
+                    // set the animation of the window
+                    dlg.SetAnimateType_Show(MZ_ANIMTYPE_ZOOM_IN);
+                    dlg.SetAnimateType_Hide(MZ_ANIMTYPE_FADE);
+                    dlg.DoModal();
+                }else{
+                    EndModal(ID_OK);
+                }
 				return;
 			}
 			if(nIndex == 1){	//更多
@@ -544,16 +549,16 @@ void Ui_CalendarWnd::OnMzCommand(WPARAM wParam, LPARAM lParam) {
 				}
 				case IDC_PPM_HISTORY:
 				{
-					UI_HistoryWnd dlg;
-					RECT rcWork = MzGetWorkArea();
-					dlg.setupdate(_month,_day);
+                    UI_HistoryWnd dlg;
+                    RECT rcWork = MzGetWorkArea();
+                    dlg.setupdate(_month,_day);
 
                     dlg.Create(rcWork.left, rcWork.top, RECT_WIDTH(rcWork), RECT_HEIGHT(rcWork),
-							m_hWnd, 0, WS_POPUP);
-					// set the animation of the window
-					dlg.SetAnimateType_Show(MZ_ANIMTYPE_SCROLL_RIGHT_TO_LEFT_2);
-					dlg.SetAnimateType_Hide(MZ_ANIMTYPE_SCROLL_LEFT_TO_RIGHT_1);
-					dlg.DoModal();
+                        m_hWnd, 0, WS_POPUP);
+                    // set the animation of the window
+                    dlg.SetAnimateType_Show(MZ_ANIMTYPE_SCROLL_RIGHT_TO_LEFT_2);
+                    dlg.SetAnimateType_Hide(MZ_ANIMTYPE_SCROLL_LEFT_TO_RIGHT_1);
+                    dlg.DoModal();
 					break;
 				}
 				case IDC_PPM_RETURN:

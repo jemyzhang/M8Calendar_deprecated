@@ -5,6 +5,7 @@
 //#include <MotorVibrate.h>
 #include "ui_config.h"
 #include "ui_today.h"
+#include "ui_calendar.h"
 
 using namespace MzCommon;
 // The global variable of the application.
@@ -50,6 +51,33 @@ BOOL M8CashApp::Init() {
 #endif
 	//正常启动程序
 	//检测程序是否已经运行
+#if 1
+    if(AppConfig.IniStartupPage.Get() != 0){
+        m_pShowWnd = new Ui_TodayWnd;
+    }else{
+        m_pShowWnd = new Ui_CalendarWnd;
+    }
+	HANDLE m_hCHDle = CreateMutex(NULL,true,L"M8Calendar");
+	if(GetLastError() == ERROR_ALREADY_EXISTS)
+	{
+		HWND pWnd=FindWindow(m_pShowWnd->GetMzClassName(),NULL);
+		//HWND pWnd=FindWindow(NULL,L"M8Cash");
+		if(pWnd)
+		{
+			SetForegroundWindow(pWnd);
+			PostMessage(pWnd,WM_NULL,NULL,NULL);
+		}
+		PostQuitMessage(0);
+		return true; 
+	}
+	// Create the main window
+	RECT rcWork = MzGetWorkArea();
+
+    m_pShowWnd->Create(rcWork.left, rcWork.top, RECT_WIDTH(rcWork), RECT_HEIGHT(rcWork), 0, 0, 0);
+    m_pShowWnd->SetAnimateType_Show(MZ_ANIMTYPE_ZOOM_IN);
+    m_pShowWnd->SetAnimateType_Hide(MZ_ANIMTYPE_NONE);
+    m_pShowWnd->Show();
+#else
 	HANDLE m_hCHDle = CreateMutex(NULL,true,L"M8Calendar");
 	if(GetLastError() == ERROR_ALREADY_EXISTS)
 	{
@@ -65,7 +93,8 @@ BOOL M8CashApp::Init() {
 	}
 	// Create the main window
 	RECT rcWork = MzGetWorkArea();
-	m_MainWnd.Create(rcWork.left, rcWork.top, RECT_WIDTH(rcWork), RECT_HEIGHT(rcWork), 0, 0, 0);
+
+    m_MainWnd.Create(rcWork.left, rcWork.top, RECT_WIDTH(rcWork), RECT_HEIGHT(rcWork), 0, 0, 0);
 
     if(AppConfig.IniStartupPage.Get() != 0){
         Ui_TodayWnd dlg;
@@ -78,7 +107,7 @@ BOOL M8CashApp::Init() {
         dlg.DoModal();
     }
 	m_MainWnd.Show();
-
+#endif
     // return TRUE means init success.
     return TRUE;
 }

@@ -1,20 +1,29 @@
-#include "ui_calendar.h"
 
-#define VER_STRING L"1.60"
-#define BUILD_STRING L"20091016"
+#define VER_STRING L"1.61"
+#define BUILD_STRING L"20091018"
 #define APPNAME L"’∆…œ≈©¿˙"
 
 // Application class derived from CMzApp
 //extern wchar_t ini_reminder[256];
 //extern CashReminder calendar_reminder;
+// include the MZFC library header file
+#include <mzfc_inc.h>
 
 class M8CashApp : public CMzApp {
 public:
+    M8CashApp(){
+        m_pShowWnd = 0;
+    }
     // The main window of the app.
-    Ui_CalendarWnd m_MainWnd;
+    //Ui_CalendarWnd m_MainWnd;
+    CMzWndEx *m_pShowWnd;
 
     //check pwd
     bool checkpwd();
     // Initialization of the application
     virtual BOOL Init();
+    int Done(){
+        if(m_pShowWnd) delete m_pShowWnd;
+        return CMzApp::Done();
+    }
 };
