@@ -230,6 +230,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ui_daconfig.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ui_dateEdit.cpp"
 				>
 			</File>
@@ -239,6 +243,10 @@
 			</File>
 			<File
 				RelativePath=".\ui_today.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ui_today_da.cpp"
 				>
 			</File>
 			<Filter
@@ -296,6 +304,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ui_daconfig.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ui_dateEdit.h"
 				>
 			</File>
@@ -305,6 +317,10 @@
 			</File>
 			<File
 				RelativePath=".\ui_today.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ui_today_da.h"
 				>
 			</File>
 			<Filter

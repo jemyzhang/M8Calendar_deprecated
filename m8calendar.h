@@ -1,6 +1,6 @@
 
-#define VER_STRING L"1.61"
-#define BUILD_STRING L"20091018"
+#define VER_STRING L"1.70"
+#define BUILD_STRING L"20091025"
 #define APPNAME L"’∆…œ≈©¿˙"
 
 // Application class derived from CMzApp
@@ -9,9 +9,9 @@
 // include the MZFC library header file
 #include <mzfc_inc.h>
 
-class M8CashApp : public CMzApp {
+class M8CalendarApp : public CMzApp {
 public:
-    M8CashApp(){
+    M8CalendarApp(){
         m_pShowWnd = 0;
     }
     // The main window of the app.

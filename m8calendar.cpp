@@ -6,52 +6,49 @@
 #include "ui_config.h"
 #include "ui_today.h"
 #include "ui_calendar.h"
+#include "ui_today_da.h"
 
 using namespace MzCommon;
 // The global variable of the application.
-M8CashApp theApp;
+M8CalendarApp theApp;
 //CashReminder calendar_reminder;
 
 extern CalendarConfig AppConfig;
 
-BOOL M8CashApp::Init() {
+BOOL M8CalendarApp::Init() {
     // Init the COM relative library.
     CoInitializeEx(0, COINIT_MULTITHREADED);
-#if 0
-	// 载入提醒
-	cash_reminder.loadReminderList();
 
 	// 判断是否是提醒调用
 	LPWSTR str = GetCommandLine();
-	//str = L"AppRunToHandleNotification 0x360000B1";
-	int handle = 0;
-	wchar_t prestr[1024];
 	if(lstrlen(str)){
-		swscanf(str,L"AppRunToHandleNotification 0x%x",&handle);
-		ReminderInfo_ptr p = cash_reminder.getReminderByEventId(handle);
-		cash_reminder.setNextReminder(p);
-		cash_reminder.saveReminderList();
-		wchar_t tmp[1024];
-		if(p && p->text.C_Str()){
-			C::restoreWrap(tmp,p->text.C_Str());
-			wsprintf(prestr,L"M8Cash财务提醒:\n%s",tmp);
-		}else{
-			wsprintf(prestr,L"M8Cash财务提醒");
-		}
-		MzSetVibrateOn(MZ_VIBRATE_ON_TIME,MZ_VIBRATE_OFF_TIME);
-		//SetBackLightState(true);	//开背光
-		//if(IsLockPhoneStatus()){	//解锁
-			//MzLeaveLockPhone();
-		//}
-		while(MzMessageBoxEx(0, prestr, L"Exit", MB_OK) != 1);
-		MzSetVibrateOff();
-		PostQuitMessage(0);
-		return true;
+        if(wcscmp(str,L"-da") == 0){
+			//检查是否已经打开
+			m_pShowWnd = new Ui_TodayDAWnd;
+
+			HANDLE m_hCHDle = CreateMutex(NULL,true,L"M8CalendarDlg");
+			if(GetLastError() == ERROR_ALREADY_EXISTS)
+			{
+				HWND pWnd=FindWindow(m_pShowWnd->GetMzClassName(),NULL);
+				if(pWnd)
+				{
+					PostMessage(pWnd,MZFC_WM_MESSAGE_QUIT,NULL,NULL);
+				}
+				PostQuitMessage(0);
+				return true; 
+			}
+	        RECT rcWork = MzGetWorkArea();
+
+            m_pShowWnd->Create(rcWork.left + 20, rcWork.top + 50, 440, 460, 0, 0, 0);
+            m_pShowWnd->SetAnimateType_Show(MZ_ANIMTYPE_NONE);
+            m_pShowWnd->SetAnimateType_Hide(MZ_ANIMTYPE_FADE);
+            m_pShowWnd->Show();
+		    return true;
+        }
 	}
-#endif
-	//正常启动程序
+
+    //正常启动程序
 	//检测程序是否已经运行
-#if 1
     if(AppConfig.IniStartupPage.Get() != 0){
         m_pShowWnd = new Ui_TodayWnd;
     }else{
@@ -77,37 +74,7 @@ BOOL M8CashApp::Init() {
     m_pShowWnd->SetAnimateType_Show(MZ_ANIMTYPE_ZOOM_IN);
     m_pShowWnd->SetAnimateType_Hide(MZ_ANIMTYPE_NONE);
     m_pShowWnd->Show();
-#else
-	HANDLE m_hCHDle = CreateMutex(NULL,true,L"M8Calendar");
-	if(GetLastError() == ERROR_ALREADY_EXISTS)
-	{
-		HWND pWnd=FindWindow(m_MainWnd.GetMzClassName(),NULL);
-		//HWND pWnd=FindWindow(NULL,L"M8Cash");
-		if(pWnd)
-		{
-			SetForegroundWindow(pWnd);
-			PostMessage(pWnd,WM_NULL,NULL,NULL);
-		}
-		PostQuitMessage(0);
-		return true; 
-	}
-	// Create the main window
-	RECT rcWork = MzGetWorkArea();
 
-    m_MainWnd.Create(rcWork.left, rcWork.top, RECT_WIDTH(rcWork), RECT_HEIGHT(rcWork), 0, 0, 0);
-
-    if(AppConfig.IniStartupPage.Get() != 0){
-        Ui_TodayWnd dlg;
-        RECT rcWork = MzGetWorkArea();
-        dlg.Create(rcWork.left, rcWork.top, RECT_WIDTH(rcWork), RECT_HEIGHT(rcWork),
-            m_MainWnd.m_hWnd, 0, WS_POPUP);
-        // set the animation of the window
-        dlg.SetAnimateType_Show(MZ_ANIMTYPE_ZOOM_IN);
-        dlg.SetAnimateType_Hide(MZ_ANIMTYPE_NONE);
-        dlg.DoModal();
-    }
-	m_MainWnd.Show();
-#endif
     // return TRUE means init success.
     return TRUE;
 }
