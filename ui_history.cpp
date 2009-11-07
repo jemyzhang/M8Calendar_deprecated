@@ -300,19 +300,13 @@ void UI_HistoryWnd::OnMzCommand(WPARAM wParam, LPARAM lParam) {
 					_detailViewMode = false;
 					m_CaptionTitle.SetText(L"历史上的今天");
 					m_CaptionTitle.Invalidate();
-					m_CaptionTitle.Update();
 
 					m_EdtDetail.SetVisible(false);
 					m_EdtDetail.Invalidate();
-					m_EdtDetail.Update();
 
 					m_ListHistory.SetVisible(true);
 					m_ListHistory.Invalidate();
-					m_ListHistory.Update();
 
-					//m_Scrollwin.SetVisible(false);
-					//m_Scrollwin.Invalidate();
-					//m_Scrollwin.Update();
 				}else{
 					// exit the modal dialog
 					EndModal(ID_OK);
@@ -326,7 +320,6 @@ void UI_HistoryWnd::setupDetailView(int idx){
 	_detailViewMode = true;
 	m_ListHistory.SetVisible(false);
 	m_ListHistory.Invalidate();
-	m_ListHistory.Update();
 
 	//
 	CALENDAR_HISTORY_ptr ph = calendar_db.historyByIndex(idx);
@@ -340,17 +333,12 @@ void UI_HistoryWnd::setupDetailView(int idx){
 
 	m_CaptionTitle.SetText(hs.title);
 	m_CaptionTitle.Invalidate();
-	m_CaptionTitle.Update();
 
 	m_EdtDetail.SetText(hs.content);
 	m_EdtDetail.SetVisible(true);
 	m_EdtDetail.Invalidate();
-	m_EdtDetail.Update();
 
 	delete[] hs.title; delete[] hs.content;
-	//m_Scrollwin.SetVisible(true);
-	//m_Scrollwin.Invalidate();
-	//m_Scrollwin.Update();
 }
 
 void UI_HistoryWnd::setupdate(DWORD month,DWORD day){
@@ -406,7 +394,6 @@ void UI_HistoryWnd::GetHistoryList(){
     }
 	m_ListHistory.setupdb(&calendar_db);
 	m_ListHistory.Invalidate();
-	m_ListHistory.Update();
 }
 
 void UiHistoryList::DrawItem(HDC hdcDst, int nIndex, RECT* prcItem, RECT *prcWin, RECT *prcUpdate){
@@ -467,7 +454,6 @@ LRESULT UI_HistoryWnd::MzDefWndProc(UINT message, WPARAM wParam, LPARAM lParam) 
                     m_ListHistory.SetSelectedIndex(nIndex);
 					m_BtnDetail.SetVisible(true);
                     m_ListHistory.Invalidate();
-                    m_ListHistory.Update();
                 }
                 return 0;
             }
@@ -475,7 +461,6 @@ LRESULT UI_HistoryWnd::MzDefWndProc(UINT message, WPARAM wParam, LPARAM lParam) 
                 m_ListHistory.SetSelectedIndex(-1);
 				m_BtnDetail.SetVisible(false);
                 m_ListHistory.Invalidate();
-                m_ListHistory.Update();
                 return 0;
             }
             if (nID == MZ_IDC_LIST_HISTORY && nNotify == MZ_MN_LBUTTONDBLCLK) {

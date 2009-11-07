@@ -3,6 +3,10 @@
 // include the MZFC library header file
 #include <mzfc_inc.h>
 
+#define VER_STRING L"1.80"
+#define BUILD_STRING L"20091106"
+#define APPNAME L"’∆…œ≈©¿˙"
+
 // Popup window derived from CMzWndEx
 
 class UI_AboutWnd : public CMzWndEx {
@@ -14,8 +18,6 @@ protected:
 	UiStatic m_TextName;
 	UiStatic m_TextAuthor;
 	UiStatic m_TextVersion;
-	UiStatic m_TextDonation;
-//	UiStatic m_TextAbout;
 
     // Initialization of the window (dialog)
     virtual BOOL OnInitDialog();

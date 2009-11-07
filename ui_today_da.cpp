@@ -3,8 +3,6 @@
 using namespace MzCommon;
 #include "ui_calendar.h"
 
-#include "resource.h"
-
 MZ_IMPLEMENT_DYNAMIC(Ui_TodayDAWnd)
 
 #define MZ_IDC_TOOLBAR_CALENDAR 101
@@ -64,9 +62,13 @@ BOOL Ui_TodayDAWnd::OnInitDialog() {
     int width = 390*1/2;
 
     m_Spliter.SetPos(width - 1,y,2,300);
-    ImagingHelper *pimg = ImagingHelper::GetImageObject(MzGetInstanceHandle(), IDB_PNG14, true);
-	m_Spliter.setupImage(pimg);
-	AddUiWin(&m_Spliter);
+
+    TCHAR ImagePath[MAX_PATH];
+	File::GetCurrentPath(ImagePath);
+	wcscat(ImagePath,L"images\\spliter.png");
+    m_Spliter.setupImagePath(ImagePath);
+
+    AddUiWin(&m_Spliter);
 
     
     m_BigDay.SetPos(0,y,width,120);
@@ -204,7 +206,6 @@ void Ui_TodayDAWnd::updateUi(){
     m_GanZhiMonth.SetText(wstmp);
 
     Invalidate();
-    //UpdateWindow();
 }
 
 LRESULT Ui_TodayDAWnd::MzDefWndProc(UINT message, WPARAM wParam, LPARAM lParam){
@@ -281,6 +282,6 @@ void UiBackGround::PaintWin(HDC hdcDst, RECT* prcWin, RECT* prcUpdate){
 	//ImagingHelper img ;
 	TCHAR ImagePath[MAX_PATH];
 	File::GetCurrentPath(ImagePath);
-	wcscat(ImagePath,L"CalendarDaBg.png");
+	wcscat(ImagePath,L"images\\CalendarDaBg.png");
 	ImagingHelper::DrawImage(hdcDst,prcWin,ImagePath);
 }

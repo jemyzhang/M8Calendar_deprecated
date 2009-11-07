@@ -2,21 +2,7 @@
 // Microsoft Visual C++ generated include file.
 // Used by Calendar.rc
 //
-#define IDB_PNG1                        102
-#define IDB_PNG2                        103
-#define IDB_PNG3                        104
-#define IDB_PNG4                        105
-#define IDB_PNG5                        106
-#define IDB_PNG6                        107
-#define IDB_PNG7                        108
-#define IDB_PNG8                        109
-#define IDB_PNG9                        110
-#define IDB_PNG10                       111
-#define IDB_PNG11                       112
-#define IDB_PNG12                       113
-#define IDB_PNG13                       114
-#define IDB_PNG14                       115
-#define IDB_PNG15                       116
+#define IDB_PNG_INSTRUCTIONS		100
 
 // Next default values for new objects
 // 

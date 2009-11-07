@@ -19,13 +19,11 @@ protected:
 		preStr = GetText();
 		SetText(L"\0");
 		Invalidate();
-		Update();
 	}
 	virtual void OnLostFocus(UiWin* pWinNext){
 		if(GetText().IsEmpty() && !preStr.IsEmpty()){
 			SetText(preStr.C_Str());
 			Invalidate();
-			Update();
 		}
 	}
 private:
@@ -60,10 +58,15 @@ public:
 //		checkDateText();
 //	}
 	/// update the control
-	virtual void Update(){
-		UiWin::Update();
+    virtual void Invalidate(RECT* prcUpdate=NULL){
 		updateDateText();
+        UiWin::Invalidate(prcUpdate);
 	}
+    ///// update the control
+    //virtual void Update(){
+    //    UiWin::Update();
+    //}
+
     // override the MZFC window messages handler
 	virtual void UiWinProc(LPARAM lParam){
 		if(!checkDateText()){
@@ -88,11 +91,8 @@ private:
 		wsprintf(s, L"%02d", _d);
 		m_EdtCalendarDay.SetText(s);
 		m_EdtCalendarYear.Invalidate();
-		m_EdtCalendarYear.Update();
 		m_EdtCalendarMonth.Invalidate();
-		m_EdtCalendarMonth.Update();
 		m_EdtCalendarDay.Invalidate();
-		m_EdtCalendarDay.Update();
 	}
 public:
 	bool checkDateText();
@@ -134,12 +134,10 @@ public:
 	void setSolarDate(DWORD year, DWORD month, DWORD day){
 		m_EdtSolarDate.setDate(year,month,day);
 		m_EdtSolarDate.Invalidate();
-		m_EdtSolarDate.Update();
 	}
 	void setLunarDate(DWORD year, DWORD month, DWORD day){
 		m_EdtLunarDate.setDate(year,month,day);
 		m_EdtLunarDate.Invalidate();
-		m_EdtLunarDate.Update();
 	}
 	void getDate(DWORD &year, DWORD &month, DWORD &day);
 protected:
@@ -170,12 +168,10 @@ public:
 	void setFromDate(DWORD year, DWORD month, DWORD day){
 		m_EdtFromDate.setDate(year,month,day);
 		m_EdtFromDate.Invalidate();
-		m_EdtFromDate.Update();
 	}
 	void setToDate(DWORD year, DWORD month, DWORD day){
 		m_EdtToDate.setDate(year,month,day);
 		m_EdtToDate.Invalidate();
-		m_EdtToDate.Update();
 	}
 	void getDateFrom(DWORD &year, DWORD &month, DWORD &day);
 	void getDateTo(DWORD &year, DWORD &month, DWORD &day);

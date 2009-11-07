@@ -52,21 +52,9 @@ END
 // PNG
 //
 
-IDB_PNG1                RCDATA                     "image\\子鼠.png"
-IDB_PNG2                RCDATA                     "image\\丑牛.png"
-IDB_PNG3                RCDATA                     "image\\寅虎.png"
-IDB_PNG4                RCDATA                     "image\\卯兔.png"
-IDB_PNG5                RCDATA                     "image\\辰龙.png"
-IDB_PNG6                RCDATA                     "image\\巳蛇.png"
-IDB_PNG7                RCDATA                     "image\\午马.png"
-IDB_PNG8                RCDATA                     "image\\未羊.png"
-IDB_PNG9                RCDATA                     "image\\申猴.png"
-IDB_PNG10               RCDATA                     "image\\酉鸡.png"
-IDB_PNG11               RCDATA                     "image\\戌狗.png"
-IDB_PNG12               RCDATA                     "image\\亥猪.png"
-IDB_PNG13               RCDATA                     "image\\header.png"
-IDB_PNG14               RCDATA                     "image\\spliter.png"
-IDB_PNG15               RCDATA                     "image\\spliter_h.png"
+IDB_PNG_INSTRUCTIONS                RCDATA                     "images\\Instruction.png"
+
+
 #endif    // 中文(中华人民共和国) resources
 /////////////////////////////////////////////////////////////////////////////
 

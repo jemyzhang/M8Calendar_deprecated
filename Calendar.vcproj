@@ -18,8 +18,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|M8SDK (ARMV4I)"
-			OutputDirectory="$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)\obj"
+			OutputDirectory="..\..\projects\M8Calendar\$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="..\..\projects\M8Calendar\$(PlatformName)\$(ConfigurationName)\obj"
 			ConfigurationType="1"
 			CharacterSet="1"
 			>
@@ -42,7 +42,7 @@
 				Name="VCCLCompilerTool"
 				ExecutionBucket="7"
 				Optimization="0"
-				PreprocessorDefinitions="_DEBUG;_WIN32_WCE=$(CEVER);UNDER_CE;WINCE;DEBUG;_WINDOWS;$(ARCHFAM);$(_ARCHFAM_);_UNICODE;UNICODE;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_HAS_CODEC"
+				PreprocessorDefinitions="_DEBUG;_WIN32_WCE=$(CEVER);UNDER_CE;WINCE;DEBUG;_WINDOWS;$(ARCHFAM);$(_ARCHFAM_);_UNICODE;UNICODE;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_HAS_CODEC;USE_903SDK"
 				MinimalRebuild="true"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="0"
@@ -69,6 +69,7 @@
 				AdditionalDependencies="mzfc.lib PlatformApi.lib CallInterface.lib libsqlitece_s.lib"
 				OutputFile="$(OutDir)/M8Calendar.exe"
 				LinkIncremental="2"
+				AdditionalLibraryDirectories="..\MzCommon\libs"
 				DelayLoadDLLs="$(NOINHERIT)"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)/M8Calendar.pdb"
@@ -107,8 +108,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|M8SDK (ARMV4I)"
-			OutputDirectory="$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)\obj"
+			OutputDirectory="..\..\projects\M8Calendar\$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="..\..\projects\M8Calendar\$(PlatformName)\$(ConfigurationName)\obj"
 			ConfigurationType="1"
 			CharacterSet="1"
 			>
@@ -132,7 +133,7 @@
 				ExecutionBucket="7"
 				Optimization="3"
 				FavorSizeOrSpeed="0"
-				PreprocessorDefinitions="NDEBUG;_WIN32_WCE=$(CEVER);UNDER_CE;WINCE;_WINDOWS;$(ARCHFAM);$(_ARCHFAM_);_UNICODE;UNICODE;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_HAS_CODEC"
+				PreprocessorDefinitions="NDEBUG;_WIN32_WCE=$(CEVER);UNDER_CE;WINCE;_WINDOWS;$(ARCHFAM);$(_ARCHFAM_);_UNICODE;UNICODE;SQLITE_ENABLE_COLUMN_METADATA;SQLITE_HAS_CODEC;USE_903SDK"
 				StringPooling="false"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
@@ -155,11 +156,12 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions=" /subsystem:windowsce,6.00"
-				AdditionalDependencies="mzfc.lib PlatformApi.lib libsqlitece_s.lib"
+				AdditionalDependencies="mzfc.lib PlatformApi.lib"
 				OutputFile="$(OutDir)/M8Calendar.exe"
 				LinkIncremental="1"
+				AdditionalLibraryDirectories="..\MzCommon\libs"
 				DelayLoadDLLs="$(NOINHERIT)"
-				GenerateDebugInformation="true"
+				GenerateDebugInformation="false"
 				ProgramDatabaseFile="$(OutDir)/M8Calendar.pdb"
 				SubSystem="0"
 				StackReserveSize="65536"
@@ -265,6 +267,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\MzCommon\UiInstructionDlg.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\MzCommon\UiSingleOption.cpp"
 					>
 				</File>
@@ -339,11 +345,19 @@
 					>
 				</File>
 				<File
+					RelativePath="..\MzCommon\MzCommonResource.h"
+					>
+				</File>
+				<File
 					RelativePath="..\MzCommon\MzConfig.h"
 					>
 				</File>
 				<File
 					RelativePath="..\MzCommon\UiImage.h"
+					>
+				</File>
+				<File
+					RelativePath="..\MzCommon\UiInstructionDlg.h"
 					>
 				</File>
 				<File
@@ -358,55 +372,11 @@
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
 			<File
-				RelativePath=".\Calendar.rc"
+				RelativePath="..\MzCommon\MzCommonRes.rc"
 				>
 			</File>
 			<File
-				RelativePath=".\image\³óÅ£.png"
-				>
-			</File>
-			<File
-				RelativePath=".\image\º¥Öí.png"
-				>
-			</File>
-			<File
-				RelativePath=".\image\ÎçÂí.png"
-				>
-			</File>
-			<File
-				RelativePath=".\image\Ã®ÍÃ.png"
-				>
-			</File>
-			<File
-				RelativePath=".\image\×ÓÊó.png"
-				>
-			</File>
-			<File
-				RelativePath=".\image\Òú»¢.png"
-				>
-			</File>
-			<File
-				RelativePath=".\image\ËÈÉß.png"
-				>
-			</File>
-			<File
-				RelativePath=".\image\Ðç¹·.png"
-				>
-			</File>
-			<File
-				RelativePath=".\image\Î´Ñò.png"
-				>
-			</File>
-			<File
-				RelativePath=".\image\Éêºï.png"
-				>
-			</File>
-			<File
-				RelativePath=".\image\³½Áú.png"
-				>
-			</File>
-			<File
-				RelativePath=".\image\ÓÏ¼¦.png"
+				RelativePath=".\res.rc"
 				>
 			</File>
 		</Filter>

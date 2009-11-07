@@ -2,12 +2,15 @@
 #include "..\MzCommon\MzCommon.h"
 using namespace MzCommon;
 
+#include <UsbNotifyApi.h>
 #include "ui_about.h"
 #include "ui_dateEdit.h"
 #include "ui_history.h"
-#include "resource.h"
 #include "ui_config.h"
 #include "ui_today.h"
+
+#include "..\MzCommon\UiInstructionDlg.h"
+#include "resource.h"
 
 extern CalendarConfig AppConfig;
 
@@ -39,7 +42,6 @@ UiGrid::UiGrid()
 	setGridSize(_rows,_cols);
 	_gwidth = 68;
 	_gheight = 68;
-	_reqUpdate = false;
 	_isAutosize = false;
 #if GRID_USE_UILIST
 	_colList = 0;
@@ -223,72 +225,69 @@ void UiGrid::SetPos(int x, int y, int w, int h, UINT flags){
 
 void UiGrid::PaintWin(HDC hdcDst, RECT* prcWin, RECT* prcUpdate){
 	UiWin::PaintWin(hdcDst,prcWin,prcUpdate);
-	if(_reqUpdate){
-		_reqUpdate = false;
-		SelectObject(pMemDC, pBitmap);
-		HBRUSH myBrush = CreateSolidBrush(RGB(255-16,255-16,255-16));
-		RECT rect;
-		rect.top = 0;
-		rect.bottom = m_nMaxY;
-		rect.left = 0;
-		rect.right = m_nMaxX;
+    SelectObject(pMemDC, pBitmap);
+    HBRUSH myBrush = CreateSolidBrush(RGB(255-16,255-16,255-16));
+    RECT rect;
+    rect.top = 0;
+    rect.bottom = m_nMaxY;
+    rect.left = 0;
+    rect.right = m_nMaxX;
 
-		FillRect(pMemDC,&rect,myBrush);//画之前先擦除.
-		//SetTextColor(RGB(0,0,0));
+    FillRect(pMemDC,&rect,myBrush);//画之前先擦除.
+    //SetTextColor(RGB(0,0,0));
 
-		//无数据
-		if(_rows <= 0 || _cols <= 0){
-			BitBlt(hdcDst,0,0,m_nMaxX,m_nMaxY,pMemDC,0,0,SRCCOPY);
-			return;
-		}
-		int _gridw = _gwidth;
-		int _gridh = _gheight;
-		if(_isAutosize){
-			int _width = prcWin->right - prcWin->left;
-			int _height = prcWin->bottom - prcWin->top;
-			_gridw = _width/_cols;
-			_gridh = _height/_rows;
-		}
-		int _x = 0;//prcWin->left;
-		int _y = 0;//prcWin->top;
+    //无数据
+    if(_rows <= 0 || _cols <= 0){
+        BitBlt(hdcDst,0,0,m_nMaxX,m_nMaxY,pMemDC,0,0,SRCCOPY);
+        return;
+    }
+    int _gridw = _gwidth;
+    int _gridh = _gheight;
+    if(_isAutosize){
+        int _width = prcWin->right - prcWin->left;
+        int _height = prcWin->bottom - prcWin->top;
+        _gridw = _width/_cols;
+        _gridh = _height/_rows;
+    }
+    int _x = 0;//prcWin->left;
+    int _y = 0;//prcWin->top;
 
-		HPEN pen = CreatePen(PS_SOLID, 0,RGB(128,128,128));
-		HPEN poldpen = (HPEN)SelectObject(pMemDC,pen);
-		SetBkMode(pMemDC,TRANSPARENT);
-		for(int i = 0; i < _rows; i++){
-			int cx = _x;
-			int cy = _y;
-			for(int j = 0; j < _cols; j++){
-				//格子
-				RECT rect = {cx + (_gridw-1)*j,cy + (_gridh-1)*i,cx + _gridw*j + _gridw,cy + _gridh*i + _gridh};
-				Rectangle(pMemDC,rect.left,rect.top,rect.right,rect.bottom);
-				//格子背景
-				RECT frect = {rect.left+1,rect.top + 1,rect.right - 2,rect.bottom - 2};
-				RECT textrect = {rect.left+1,rect.top + 1,rect.right - 2,rect.bottom - 20};
-				HBRUSH bqbrush;
-				if(_grids[i][j].isSelected){	//selected
-					::SetTextColor(pMemDC,_seltxt);
-					MzDrawSelectedBg_NoLine(pMemDC,&frect);
-				}else{
-					bqbrush = CreateSolidBrush(RGB(255-16,255-16,255-16));
-					::SetTextColor(pMemDC,_grids[i][j].textColor);
-					FillRect(pMemDC,&frect,bqbrush);
-				}
-				HFONT font = FontHelper::GetFont(_grids[i][j].textSize);
-				SelectObject(pMemDC,font);
-				MzDrawText( pMemDC,_grids[i][j].text.C_Str(), &textrect, DT_CENTER|DT_VCENTER );
-				DeleteObject(font);
+    HPEN pen = CreatePen(PS_SOLID, 0,RGB(128,128,128));
+    HPEN poldpen = (HPEN)SelectObject(pMemDC,pen);
+    SetBkMode(pMemDC,TRANSPARENT);
+    for(int i = 0; i < _rows; i++){
+        int cx = _x;
+        int cy = _y;
+        for(int j = 0; j < _cols; j++){
+            //格子
+            RECT rect = {cx + (_gridw-1)*j,cy + (_gridh-1)*i,cx + _gridw*j + _gridw,cy + _gridh*i + _gridh};
+            Rectangle(pMemDC,rect.left,rect.top,rect.right,rect.bottom);
+            //格子背景
+            RECT frect = {rect.left+1,rect.top + 1,rect.right - 2,rect.bottom - 2};
+            RECT textrect = {rect.left+1,rect.top + 1,rect.right - 2,rect.bottom - 20};
+            HBRUSH bqbrush;
+            if(_grids[i][j].isSelected){	//selected
+                ::SetTextColor(pMemDC,_seltxt);
+                MzDrawSelectedBg_NoLine(pMemDC,&frect);
+            }else{
+                bqbrush = CreateSolidBrush(RGB(255-16,255-16,255-16));
+                ::SetTextColor(pMemDC,_grids[i][j].textColor);
+                FillRect(pMemDC,&frect,bqbrush);
+            }
+            HFONT font = FontHelper::GetFont(_grids[i][j].textSize);
+            SelectObject(pMemDC,font);
+            MzDrawText( pMemDC,_grids[i][j].text.C_Str(), &textrect, DT_CENTER|DT_VCENTER );
+            DeleteObject(font);
 
-				font = FontHelper::GetFont(_grids[i][j].text1Size);
-				SelectObject(pMemDC,font);
-				::SetTextColor(pMemDC,_grids[i][j].text1Color);
-				RECT text1rect = {rect.left+1,rect.top + 35,rect.right - 2,rect.bottom - 2};
-				MzDrawText( pMemDC,_grids[i][j].text1.C_Str(), &text1rect, DT_CENTER|DT_VCENTER );
-				DeleteObject(font);
-			}
-		}
-		SelectObject(pMemDC,poldpen);
-	}
+            font = FontHelper::GetFont(_grids[i][j].text1Size);
+            SelectObject(pMemDC,font);
+            ::SetTextColor(pMemDC,_grids[i][j].text1Color);
+            RECT text1rect = {rect.left+1,rect.top + 35,rect.right - 2,rect.bottom - 2};
+            MzDrawText( pMemDC,_grids[i][j].text1.C_Str(), &text1rect, DT_CENTER|DT_VCENTER );
+            DeleteObject(font);
+        }
+    }
+    SelectObject(pMemDC,poldpen);
 	BitBlt(hdcDst,prcWin->left,prcWin->top,m_nMaxX,m_nMaxY,pMemDC,0,0,SRCCOPY);
 }
 //////
@@ -368,9 +367,35 @@ BOOL Ui_CalendarWnd::OnInitDialog() {
 	DateTime::getDate(&_year,&_month,&_day);
 	updateGrid();
 	updateInfo(true);
+
+    //g_iUsbNotifyMsg = RegisterUsbNotifyMsg();
+	::SetTimer(m_hWnd,0x8000,500,NULL);
     return TRUE;
 }
 
+void Ui_CalendarWnd::OnTimer(UINT_PTR nIDEvent){
+	switch(nIDEvent){
+		case 0x8000:
+			::KillTimer(m_hWnd,0x8000);
+			if(AppConfig.IniFirstRun.Get()){
+				Ui_InstructionWnd dlg;
+				dlg.SetInstructionImage(
+					ImagingHelper::GetImageObject(MzGetInstanceHandle(),IDB_PNG_INSTRUCTIONS)
+					);
+				RECT rcWork = MzGetWorkArea();
+				dlg.Create(rcWork.left, rcWork.top+80, RECT_WIDTH(rcWork), RECT_HEIGHT(rcWork) - 150,
+					m_hWnd, 0, WS_POPUP);
+				// set the animation of the window
+				dlg.SetAnimateType_Show(MZ_ANIMTYPE_NONE);
+				dlg.SetAnimateType_Hide(MZ_ANIMTYPE_FADE);
+				int nRet = dlg.DoModal();
+				if(nRet == ID_OK){
+					AppConfig.IniFirstRun.Set(0);
+				}
+			}
+			break;
+	}
+}
 void Ui_CalendarWnd::updateGrid(){
 	int week = (DateTime::getWeekDay(_year,_month,1)+1)%7;	//获取1号的星期
 	int days = DateTime::getDays(_year,_month);
@@ -419,7 +444,6 @@ void Ui_CalendarWnd::updateGrid(){
 		}
 	}
 	m_Calendar.Invalidate();
-	m_Calendar.Update();
 }
 
 void Ui_CalendarWnd::OnMzCommand(WPARAM wParam, LPARAM lParam) {
@@ -439,7 +463,7 @@ void Ui_CalendarWnd::OnMzCommand(WPARAM wParam, LPARAM lParam) {
                     dlg.Create(rcWork.left, rcWork.top, RECT_WIDTH(rcWork), RECT_HEIGHT(rcWork),
                         m_hWnd, 0, WS_POPUP);
                     // set the animation of the window
-                    dlg.SetAnimateType_Show(MZ_ANIMTYPE_ZOOM_IN);
+                    dlg.SetAnimateType_Show(MZ_ANIMTYPE_NONE);
                     dlg.SetAnimateType_Hide(MZ_ANIMTYPE_FADE);
                     dlg.DoModal();
                 }else{
@@ -578,7 +602,7 @@ void Ui_CalendarWnd::OnMzCommand(WPARAM wParam, LPARAM lParam) {
 				dlg.SetAnimateType_Hide(MZ_ANIMTYPE_SCROLL_LEFT_TO_RIGHT_1);
 				int ret = dlg.DoModal();
 				if(ret == ID_OK){
-					_showMonthByJieqi = AppConfig.IniJieqiOrder.Get();
+					_showMonthByJieqi = (AppConfig.IniJieqiOrder.Get() > 0);
 					updateGrid();
 					updateInfo(true);
 					showTip();
@@ -625,11 +649,20 @@ void Ui_CalendarWnd::showTip(bool bshow){
 			Invalidate(&r);
 		}
 		m_Tipyiji.Invalidate();
-		m_Tipyiji.Update();
 	}
 }
 
 LRESULT Ui_CalendarWnd::MzDefWndProc(UINT message, WPARAM wParam, LPARAM lParam) {
+    //if(message == g_iUsbNotifyMsg)
+    //{
+    //    INT iEvenType = (INT)wParam;
+    //    if (iEvenType==USB_MASSSTORAGE_ATTACH)//USB模式
+    //    {
+    //        MzMessageBoxEx(NULL,L"掌上农历不能在U盘模式下使用，确认后退出！",NULL,MB_OK,false);
+    //        PostQuitMessage(0);
+    //    }
+    //}
+
     switch (message) {
 		case MZ_WM_MOUSE_NOTIFY:
 		{
@@ -642,7 +675,6 @@ LRESULT Ui_CalendarWnd::MzDefWndProc(UINT message, WPARAM wParam, LPARAM lParam)
 					if(m_Tipyiji.IsVisible()){
 						m_Tipyiji.SetVisible(false);
 						m_Tipyiji.Invalidate();
-						m_Tipyiji.Update();
 					}
 				}
 				return 0;
@@ -659,20 +691,20 @@ LRESULT Ui_CalendarWnd::MzDefWndProc(UINT message, WPARAM wParam, LPARAM lParam)
             if (nNotify == MZ_MN_LBUTTONUP) {
 				if(_isMouseMoving){
 					_isMouseMoving = false;
-					if(x > _MouseX + 200 && y < _MouseY + 100 && y > _MouseY - 100){	//右移 下一月
-						DateTime::getNextDate(_year,_month);
-						_day = 1;
-					}
-					if(x < _MouseX - 200 && y < _MouseY + 100 && y > _MouseY - 100){	//左移 上一月
+					if(x > _MouseX + 200 && y < _MouseY + 100 && y > _MouseY - 100){	//右移 上一月
 						DateTime::getPreDate(_year,_month);
 						_day = 1;
 					}
-					if(y > _MouseY + 200 && x < _MouseX + 100 && x > _MouseX - 100){	//下移 下一年
-						_year++;
+					if(x < _MouseX - 200 && y < _MouseY + 100 && y > _MouseY - 100){	//左移 下一月
+						DateTime::getNextDate(_year,_month);
 						_day = 1;
 					}
-					if(y < _MouseY - 200 && x < _MouseX + 100 && x > _MouseX - 100){	//上移 上一年
+					if(y > _MouseY + 200 && x < _MouseX + 100 && x > _MouseX - 100){	//下移 上一年
 						_year--;
+						_day = 1;
+					}
+					if(y < _MouseY - 200 && x < _MouseX + 100 && x > _MouseX - 100){	//上移 下一年
+						_year++;
 						_day = 1;
 					}
 					updateGrid();
@@ -696,9 +728,6 @@ LRESULT Ui_CalendarWnd::MzDefWndProc(UINT message, WPARAM wParam, LPARAM lParam)
 							return 0;
 						}
 						updateGrid();
-						//m_Calendar.setSelectedIndex(r,c);
-						//m_Calendar.Invalidate();
-						//m_Calendar.Update();
 						updateInfo();
 						showTip(force);
 					}
@@ -733,7 +762,7 @@ void Ui_CalendarWnd::updateInfo(bool forceupdate){
 	static int y = 0;
 	static int m = 0;
 	static int d = 0;
-    _showMonthByJieqi = AppConfig.IniJieqiOrder.Get();
+    _showMonthByJieqi = (AppConfig.IniJieqiOrder.Get() > 0);
 	if(y != _year || 
 		m != _month ||
 		d != _day || forceupdate){
@@ -742,18 +771,20 @@ void Ui_CalendarWnd::updateInfo(bool forceupdate){
 		_lstm.setLunarMonthGanZhiMode(_showMonthByJieqi);
 		unsigned char zodiac;
 		CMzString zodiacName = _lstm.Zodiac(&zodiac);
-		ImagingHelper *pimg = ImagingHelper::GetImageObject(MzGetInstanceHandle(), IDB_PNG1 + zodiac, true);
+
+        TCHAR ImagePath[MAX_PATH];
+        TCHAR ImageFile[MAX_PATH];
+        File::GetCurrentPath(ImagePath);
+        wsprintf(ImageFile,L"%s\\images\\%d.png",ImagePath,zodiac);
+        m_ZodiacImage.setupImagePath(ImageFile);
 		//update zodiac image
-		m_ZodiacImage.setupImage(pimg);
 		m_ZodiacImage.Invalidate();
-		m_ZodiacImage.Update();
 
 		//update datetime
 		wchar_t datestr[16];
 		wsprintf(datestr,L"%d年%d月%d日",_year,_month,_day);
 		m_YearMonth.SetText(datestr);
 		m_YearMonth.Invalidate();
-		m_YearMonth.Update();
 
 		//update ganzhi datetime
 		wsprintf(datestr,L"%s年 %s月 %s日",
@@ -762,7 +793,6 @@ void Ui_CalendarWnd::updateInfo(bool forceupdate){
 			_lstm.GanZhiDay().C_Str());
 		m_GanZhiYMD.SetText(datestr);
 		m_GanZhiYMD.Invalidate();
-		m_GanZhiYMD.Update();
 		//update lunar datetime
 		wsprintf(datestr,L"农历%s%s日 %s年",
 			_lstm.LunarMonth().C_Str(),
@@ -770,7 +800,6 @@ void Ui_CalendarWnd::updateInfo(bool forceupdate){
 			zodiacName.C_Str());
 		m_LunarMD.SetText(datestr);
 		m_LunarMD.Invalidate();
-		m_LunarMD.Update();
 		y = _year;
 		m = _month;
 		d = _day;

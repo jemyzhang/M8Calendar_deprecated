@@ -17,8 +17,8 @@ CalendarConfig AppConfig;
 MZ_IMPLEMENT_DYNAMIC(Ui_ConfigWnd)
 
 const wchar_t* JIEQIMODESTR[] = {
-	L"以农历初一为起点",
-	L"以节气交界日为起点",
+	L"农历初一",
+	L"节气交界日",
 };
 
 const wchar_t* FONTSIZESTR[] = {
@@ -94,15 +94,12 @@ BOOL Ui_ConfigWnd::OnInitDialog() {
 void Ui_ConfigWnd::updateUi(){
 	m_BtnJieqi.SetText2(JIEQIMODESTR[AppConfig.IniJieqiOrder.Get()]);
 	m_BtnJieqi.Invalidate();
-	m_BtnJieqi.Update();
 
     m_BtnFontSize.SetText2(FONTSIZESTR[AppConfig.IniHistodayFontSize.Get()]);
 	m_BtnFontSize.Invalidate();
-	m_BtnFontSize.Update();
 
     m_BtnStartupPage.SetText2(StartupPageStr[AppConfig.IniStartupPage.Get()]);
 	m_BtnStartupPage.Invalidate();
-	m_BtnStartupPage.Update();
 
 }
 
@@ -139,7 +136,7 @@ void Ui_ConfigWnd::ShowJieqiOptionDlg(){
     dlg.SetSelectedIndex(AppConfig.IniJieqiOrder.Get());
     dlg.SetTitleText(L"设定干支纪月方式");
     RECT rcWork = MzGetWorkArea();
-    dlg.Create(rcWork.left + 40, rcWork.top + 120, RECT_WIDTH(rcWork) - 80, RECT_HEIGHT(rcWork) - 240,
+    dlg.Create(rcWork.left + 40, rcWork.top + 160, RECT_WIDTH(rcWork) - 80,210 + 70*2,
         m_hWnd, 0, WS_POPUP);
     // set the animation of the window
     dlg.SetAnimateType_Show(MZ_ANIMTYPE_NONE);
@@ -160,7 +157,7 @@ void Ui_ConfigWnd::ShowFontSizeOptionDlg(){
     dlg.SetSelectedIndex(AppConfig.IniHistodayFontSize.Get());
     dlg.SetTitleText(L"设定浏览文字大小");
     RECT rcWork = MzGetWorkArea();
-    dlg.Create(rcWork.left + 40, rcWork.top + 120, RECT_WIDTH(rcWork) - 80, RECT_HEIGHT(rcWork) - 240,
+    dlg.Create(rcWork.left + 40, rcWork.top + 140, RECT_WIDTH(rcWork) - 80, 210 + 70*3,
         m_hWnd, 0, WS_POPUP);
     // set the animation of the window
     dlg.SetAnimateType_Show(MZ_ANIMTYPE_NONE);
@@ -181,7 +178,7 @@ void Ui_ConfigWnd::ShowStartupOptionDlg(){
     dlg.SetSelectedIndex(AppConfig.IniStartupPage.Get());
     dlg.SetTitleText(L"设定启动界面");
     RECT rcWork = MzGetWorkArea();
-    dlg.Create(rcWork.left + 40, rcWork.top + 120, RECT_WIDTH(rcWork) - 80, RECT_HEIGHT(rcWork) - 240,
+    dlg.Create(rcWork.left + 40, rcWork.top + 160, RECT_WIDTH(rcWork) - 80, 210 + 70*2,
         m_hWnd, 0, WS_POPUP);
     // set the animation of the window
     dlg.SetAnimateType_Show(MZ_ANIMTYPE_NONE);

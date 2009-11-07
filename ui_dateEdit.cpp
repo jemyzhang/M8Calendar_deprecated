@@ -11,6 +11,8 @@ MZ_IMPLEMENT_DYNAMIC(Ui_ToDateWnd)
 #define MZ_IDC_EDIT_LUNAR 102
 #define MZ_IDC_BTN_TO 103
 #define MZ_IDC_BTN_CANCEL 104
+#define MZ_IDC_EDIT_FROM 105
+#define MZ_IDC_EDIT_TO 106
 
 
 void UiDateEdit::init(){
@@ -42,6 +44,8 @@ void UiDateEdit::init(){
 	m_EdtCalendarDay.SetID(baseid);
 	m_EdtCalendarDay.EnableNotifyMessage(true);
 	AddChild(&m_EdtCalendarDay);
+
+    updateDateText();
 }
 
 bool UiDateEdit::checkDateText(){
@@ -67,11 +71,8 @@ bool UiDateEdit::checkDateText(){
 	}
 
 	m_EdtCalendarYear.Invalidate();
-	m_EdtCalendarYear.Update();
 	m_EdtCalendarMonth.Invalidate();
-	m_EdtCalendarMonth.Update();
 	m_EdtCalendarDay.Invalidate();
-	m_EdtCalendarDay.Update();
 	return (rc != 0);
 }
 
@@ -106,7 +107,6 @@ BOOL Ui_ToDateWnd::OnInitDialog() {
 	m_EdtSolarDate.SetPos(GetWidth()/4,y,GetWidth()*3/4 - 20,MZM_HEIGHT_SINGLELINE_EDIT);
 	m_EdtSolarDate.SetID(MZ_IDC_EDIT_SOLAR);
 	m_EdtSolarDate.init();
-	m_EdtSolarDate.Update();
 	m_EdtSolarDate.EnableNotifyMessage(true);
 	m_bg.AddChild(&m_EdtSolarDate);
 
@@ -119,7 +119,6 @@ BOOL Ui_ToDateWnd::OnInitDialog() {
 	m_EdtLunarDate.SetPos(GetWidth()/4,y,GetWidth()*3/4 - 20,MZM_HEIGHT_SINGLELINE_EDIT);
 	m_EdtLunarDate.SetID(MZ_IDC_EDIT_LUNAR);
 	m_EdtLunarDate.init();
-	m_EdtLunarDate.Update();
 	m_EdtLunarDate.EnableNotifyMessage(true);
 	m_bg.AddChild(&m_EdtLunarDate);
 
@@ -166,7 +165,6 @@ LRESULT Ui_ToDateWnd::MzDefWndProc(UINT message, WPARAM wParam, LPARAM lParam) {
 				LSDate l = s.getLunarDate();
 				m_EdtLunarDate.setDate(l.year,l.month,l.day);
 				m_EdtLunarDate.Invalidate();
-				m_EdtLunarDate.Update();
 				return 0;
 			}else if(nID == MZ_IDC_EDIT_LUNAR){
 				DWORD y,m,d;
@@ -176,19 +174,35 @@ LRESULT Ui_ToDateWnd::MzDefWndProc(UINT message, WPARAM wParam, LPARAM lParam) {
 				LSDate l = s.getSolarDate();
 				m_EdtSolarDate.setDate(l.year,l.month,l.day);
 				m_EdtSolarDate.Invalidate();
-				m_EdtSolarDate.Update();
 				return 0;
 			}
 			return 0;
 		}
-		case MZ_WM_UI_FOCUS:
-		{
-            int nID = LOWORD(wParam);
-            if (nID == MZ_IDC_EDIT_SOLAR || nID == MZ_IDC_EDIT_LUNAR) {
-//				MzOpenSip(IM_SIP_MODE_DIGIT);
+        case MZ_WM_WND_ACTIVATE:
+            {
+                if(::GetFocus() != m_hWnd){
+                    ::MzCloseSip();
+                }else{
+                    MzOpenSip(IM_SIP_MODE_ADDRESSEE_123);
+                }
                 return 0;
             }
-		}
+		case MZ_WM_UI_FOCUS:
+            {
+                int nID = LOWORD(wParam);
+                if (nID == MZ_IDC_EDIT_SOLAR || nID == MZ_IDC_EDIT_LUNAR) {
+                    if(MzIsSipOpen()){
+                        DWORD dwSipMode;
+                        GetSipMode(dwSipMode);
+                        if(dwSipMode != IM_SIP_MODE_ADDRESSEE_123){
+                            MzOpenSip(IM_SIP_MODE_ADDRESSEE_123);
+                        }
+                    }else{
+                        MzOpenSip(IM_SIP_MODE_ADDRESSEE_123);
+                    }
+                    return 0;
+                }
+            }
     }
     return CMzWndEx::MzDefWndProc(message, wParam, lParam);
 }
@@ -228,8 +242,9 @@ BOOL Ui_LenDateWnd::OnInitDialog() {
 	m_bg.AddChild(&m_LblFromDate);
 
 	m_EdtFromDate.SetPos(GetWidth()/4,y,GetWidth()*3/4 - 20,MZM_HEIGHT_SINGLELINE_EDIT);
+	m_EdtFromDate.SetID(MZ_IDC_EDIT_FROM);
 	m_EdtFromDate.init();
-	m_EdtFromDate.Update();
+	m_EdtFromDate.EnableNotifyMessage(true);
 	m_bg.AddChild(&m_EdtFromDate);
 
 	y += MZM_HEIGHT_SINGLELINE_EDIT;
@@ -239,8 +254,9 @@ BOOL Ui_LenDateWnd::OnInitDialog() {
     m_bg.AddChild(&m_LblToDate);
 
 	m_EdtToDate.SetPos(GetWidth()/4,y,GetWidth()*3/4 - 20,MZM_HEIGHT_SINGLELINE_EDIT);
+	m_EdtToDate.SetID(MZ_IDC_EDIT_TO);
 	m_EdtToDate.init();
-	m_EdtToDate.Update();
+	m_EdtToDate.EnableNotifyMessage(true);
 	m_bg.AddChild(&m_EdtToDate);
 
 	y += MZM_HEIGHT_SINGLELINE_EDIT;
@@ -275,10 +291,31 @@ void Ui_LenDateWnd::OnMzCommand(WPARAM wParam, LPARAM lParam) {
 
 LRESULT Ui_LenDateWnd::MzDefWndProc(UINT message, WPARAM wParam, LPARAM lParam) {
     switch (message) {
+        case MZ_WM_WND_ACTIVATE:
+            {
+                if(::GetFocus() != m_hWnd){
+                    ::MzCloseSip();
+                }else{
+                    MzOpenSip(IM_SIP_MODE_ADDRESSEE_123);
+                }
+                return 0;
+            }
 		case MZ_WM_UI_FOCUS:
-		{
-            int nID = LOWORD(wParam);
-		}
+            {
+                int nID = LOWORD(wParam);
+                if (nID == MZ_IDC_EDIT_FROM || nID == MZ_IDC_EDIT_TO) {
+                    if(MzIsSipOpen()){
+                        DWORD dwSipMode;
+                        GetSipMode(dwSipMode);
+                        if(dwSipMode != IM_SIP_MODE_ADDRESSEE_123){
+                            MzOpenSip(IM_SIP_MODE_ADDRESSEE_123);
+                        }
+                    }else{
+                        MzOpenSip(IM_SIP_MODE_ADDRESSEE_123);
+                    }
+                    return 0;
+                }
+            }
     }
     return CMzWndEx::MzDefWndProc(message, wParam, lParam);
 }

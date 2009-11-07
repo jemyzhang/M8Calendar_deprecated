@@ -37,9 +37,26 @@ BOOL M8CalendarApp::Init() {
 				PostQuitMessage(0);
 				return true; 
 			}
+            int dlgX,dlgY;
 	        RECT rcWork = MzGetWorkArea();
+            //¼ì²âÊÇ·ñºáÆÁ
+            DEVMODE settings;
+            memset(&settings, 0, sizeof(DEVMODE));
+            settings.dmSize = sizeof(DEVMODE);
 
-            m_pShowWnd->Create(rcWork.left + 20, rcWork.top + 50, 440, 460, 0, 0, 0);
+            settings.dmFields = DM_DISPLAYORIENTATION;
+            ChangeDisplaySettingsEx(NULL, &settings, NULL, CDS_TEST, NULL);
+            if(settings.dmDisplayOrientation == 0 || settings.dmDisplayOrientation == 2){
+                //ºáÆÁ
+                dlgX = rcWork.left + 140;
+                dlgY = 0;
+            }else{
+                dlgX = rcWork.left + 20;
+                dlgY = rcWork.top + 50;
+            }
+            //Æô¶¯
+
+            m_pShowWnd->Create(dlgX, dlgY, 440, 460, 0, 0, 0,WS_EX_TOPMOST);
             m_pShowWnd->SetAnimateType_Show(MZ_ANIMTYPE_NONE);
             m_pShowWnd->SetAnimateType_Hide(MZ_ANIMTYPE_FADE);
             m_pShowWnd->Show();

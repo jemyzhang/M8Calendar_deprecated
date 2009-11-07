@@ -17,11 +17,13 @@ protected:
 		IniJieqiOrder.InitKey(L"Config",L"JieqiOrder",0);
         IniHistodayFontSize.InitKey(L"Config",L"HisFontSize",0);
         IniStartupPage.InitKey(L"Config",L"StartupPage",0);
+		IniFirstRun.InitKey(L"Help",L"isFirstRun",1);
 	}
 public:
 	MzConfig IniJieqiOrder;//1: 以节气交界日为起点 0: 以农历初一为起点
     MzConfig IniHistodayFontSize;   //0:小 1: 中 2: 大
     MzConfig IniStartupPage;    //0: Month 1: Today
+	MzConfig IniFirstRun;
 };
 
 class Ui_ConfigWnd : public CMzWndEx {

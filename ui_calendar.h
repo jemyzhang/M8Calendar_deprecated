@@ -92,9 +92,6 @@ public:
 	UiGrid(void);
 	~UiGrid(void);
 	virtual void PaintWin(HDC hdcDst, RECT* prcWin, RECT* prcUpdate);
-	virtual void OnPaint(HDC hdcDst, RECT* prcWin, RECT* prcUpdate){
-		UiWin::OnPaint(hdcDst,prcWin,prcUpdate);
-	}
 public:
 	//if ret = false, no selection
 	bool calcSelectedIndex(int x, int y,int &row, int &col);
@@ -121,10 +118,6 @@ public:
 	int getRowCount(void);
 	int getColCount(void);
 public:
-	virtual void Update(){
-		_reqUpdate = true;
-		UiWin::Update();
-	}
 	virtual void SetPos(int x, int y, int w, int h, UINT flags=0);
 private:
 	typedef struct GridAttr{
@@ -146,7 +139,6 @@ private:
 	int _rows,_cols;
 	bool _isAutosize;
 	int _gwidth, _gheight;
-	bool _reqUpdate;
 	int m_nMaxX;
 	int m_nMaxY;
 private:
@@ -186,6 +178,7 @@ public:
 protected:
     // Initialization of the window (dialog)
     virtual BOOL OnInitDialog();
+	virtual void OnTimer(UINT_PTR nIDEvent);
 
     // override the MZFC command handler
     virtual void OnMzCommand(WPARAM wParam, LPARAM lParam);
@@ -202,4 +195,5 @@ private:
 	short _MouseX;
 	short _MouseY;
 	int sel_row,sel_col;
+    INT g_iUsbNotifyMsg;
 };

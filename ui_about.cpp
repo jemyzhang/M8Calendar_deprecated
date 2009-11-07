@@ -1,7 +1,5 @@
 #include "ui_about.h"
 
-#include "m8calendar.h"
-
 MZ_IMPLEMENT_DYNAMIC(UI_AboutWnd)
 
 #define MZ_IDC_TOOLBAR_ABOUT 101
@@ -36,14 +34,6 @@ BOOL UI_AboutWnd::OnInitDialog() {
 	m_TextVersion.SetPos(0, y, GetWidth(), MZM_HEIGHT_CAPTION);
 	m_TextVersion.SetText(version);
     AddUiWin(&m_TextVersion);
-
-	y = GetHeight() - MZM_HEIGHT_TEXT_TOOLBAR - MZM_HEIGHT_CAPTION * 2;
-	m_TextDonation.SetPos(0, y, GetWidth(), MZM_HEIGHT_CAPTION*2);
-	m_TextDonation.SetTextColor(RGB(128,128,128));
-	m_TextDonation.SetDrawTextFormat(DT_RIGHT);
-	m_TextDonation.SetTextSize(20);
-	m_TextDonation.SetText(L" 如果您愿意，可以向以下支付宝账号捐赠：\njemyzhang@163.com  ");
-    AddUiWin(&m_TextDonation);
 
 	m_Toolbar.SetPos(0, GetHeight() - MZM_HEIGHT_TEXT_TOOLBAR, GetWidth(), MZM_HEIGHT_TEXT_TOOLBAR);
     m_Toolbar.SetButton(0, true, true, L"返回");

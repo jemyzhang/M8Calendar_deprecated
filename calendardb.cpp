@@ -2,6 +2,7 @@
 //#include "pinyin_sort.h"
 #include "..\MzCommon\MzCommon.h"
 using namespace MzCommon;
+#pragma comment(lib,"libsqlitece_s.lib")
 
 clsCalendarDB::clsCalendarDB() {
 }

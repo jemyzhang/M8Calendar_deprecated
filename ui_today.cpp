@@ -4,8 +4,6 @@ using namespace MzCommon;
 #include "ui_calendar.h"
 #include "ui_config.h"
 
-#include "resource.h"
-
 MZ_IMPLEMENT_DYNAMIC(Ui_TodayWnd)
 
 #define MZ_IDC_TOOLBAR_CALENDAR 101
@@ -45,9 +43,12 @@ BOOL Ui_TodayWnd::OnInitDialog() {
         return FALSE;
     }
 
+    TCHAR ImagePath[MAX_PATH];
+
    	m_Header.SetPos(0,0,GetWidth(),35);
-    ImagingHelper *pimg = ImagingHelper::GetImageObject(MzGetInstanceHandle(), IDB_PNG13, true);
-	m_Header.setupImage(pimg);
+	File::GetCurrentPath(ImagePath);
+	wcscat(ImagePath,L"images\\header.png");
+    m_Header.setupImagePath(ImagePath);
 	AddUiWin(&m_Header);
 
     SetBgColor(RGB(255,255,255));
@@ -64,8 +65,9 @@ BOOL Ui_TodayWnd::OnInitDialog() {
     int width = GetWidth()*1/2;
 
     m_Spliter.SetPos(width - 1,y,2,300);
-    pimg = ImagingHelper::GetImageObject(MzGetInstanceHandle(), IDB_PNG14, true);
-	m_Spliter.setupImage(pimg);
+	File::GetCurrentPath(ImagePath);
+	wcscat(ImagePath,L"images\\spliter.png");
+    m_Spliter.setupImagePath(ImagePath);
 	AddUiWin(&m_Spliter);
 
     
@@ -128,8 +130,9 @@ BOOL Ui_TodayWnd::OnInitDialog() {
     AddUiWin(&m_GanZhiMonth);
 
     m_Spliter_h.SetPos(0,y + 60,GetWidth(),2);
-    pimg = ImagingHelper::GetImageObject(MzGetInstanceHandle(), IDB_PNG15, true);
-	m_Spliter_h.setupImage(pimg);
+	File::GetCurrentPath(ImagePath);
+	wcscat(ImagePath,L"images\\spliter_h.png");
+    m_Spliter_h.setupImagePath(ImagePath);
 	AddUiWin(&m_Spliter_h);
 
 	y+= LINEHEIGHT + 30;
@@ -266,7 +269,7 @@ void Ui_TodayWnd::OnMzCommand(WPARAM wParam, LPARAM lParam) {
                     dlg.Create(rcWork.left, rcWork.top, RECT_WIDTH(rcWork), RECT_HEIGHT(rcWork),
                         m_hWnd, 0, WS_POPUP);
                     // set the animation of the window
-                    dlg.SetAnimateType_Show(MZ_ANIMTYPE_ZOOM_IN);
+                    dlg.SetAnimateType_Show(MZ_ANIMTYPE_NONE);
                     dlg.SetAnimateType_Hide(MZ_ANIMTYPE_FADE);
                     dlg.DoModal();
                 }else{

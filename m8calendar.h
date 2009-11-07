@@ -1,7 +1,4 @@
-
-#define VER_STRING L"1.70"
-#define BUILD_STRING L"20091025"
-#define APPNAME L"уфиое╘юЗ"
+#pragma once
 
 // Application class derived from CMzApp
 //extern wchar_t ini_reminder[256];
